@@ -1,3 +1,7 @@
+// Permission System - Dynamic role-based access control
+// This schema manages permissions for different user roles
+// Supports: admin, manager, staff roles with granular action control
+
 const mongoose = require("mongoose");
 
 const rolePermissionSchema = new mongoose.Schema(
