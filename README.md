@@ -263,9 +263,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 👨‍💻 Author
 
-**Ahmed Hassan**
-- Email: ahmed@example.com
-- GitHub: [@ahmedhassan](https://github.com)
+**Ruqia Isse**
+- Email: ruqiaisse07@gmail.com
+- GitHub: [@ruqiaisse](https://github.com)
 
 ## 🐛 Bug Reports & Features
 
