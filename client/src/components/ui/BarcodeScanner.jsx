@@ -30,6 +30,8 @@ function BarcodeScanner({ onScan, onClose, mode = "qr" }) {
     const scanner = new Html5QrcodeScanner("qr-reader", {
       fps: 10,
       qrbox: 250,
+      rememberLastUsedCamera: true,
+      formatsToSupport: ["QR_CODE", "EAN_13", "CODE_128"],
     });
     scannerRef.current = scanner;
 

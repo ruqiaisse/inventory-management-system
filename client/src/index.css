@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+/* Scanner fixes: ensure html5-qrcode elements match theme and don't produce a white fullscreen */
+#qr-reader {
+	background: transparent;
+}
+
+#qr-reader video,
+#qr-reader canvas {
+	background: transparent !important;
+	max-width: 100%;
+	height: auto !important;
+	border-radius: 0.75rem;
+}
+
+/* Prevent injected overlays from covering the whole viewport */
+.html5-qrcode-full-region {
+	background: transparent !important;
+}
