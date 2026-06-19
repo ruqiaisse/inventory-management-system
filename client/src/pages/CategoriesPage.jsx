@@ -1,10 +1,12 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
+import { Edit2, Trash2, Plus } from "lucide-react";
 
 import MainLayout from "../components/layout/MainLayout";
 import PageHeader from "../components/ui/PageHeader";
 import Modal from "../components/ui/Modal";
 import Toast from "../components/ui/Toast";
+import usePermission from "../hooks/usePermission";
 
 import {
   getCategories,
@@ -32,6 +34,8 @@ const CategoriesPage = () => {
     name: "",
     description: "",
   });
+
+  const { can } = usePermission();
 
   // LOAD CATEGORIES
   const fetchCategories = async () => {
@@ -70,6 +74,8 @@ const CategoriesPage = () => {
 
   // OPEN ADD MODAL
   const handleAdd = () => {
+    if (!can("categories.create")) return;
+
     setSelectedCategory(null);
 
     setFormData({
@@ -82,6 +88,8 @@ const CategoriesPage = () => {
 
   // OPEN EDIT MODAL
   const handleEdit = (category) => {
+    if (!can("categories.update")) return;
+
     setSelectedCategory(category);
 
     setFormData({
@@ -145,8 +153,19 @@ const CategoriesPage = () => {
       <div className="p-6">
         <PageHeader
           title="Categories"
-          buttonText="Add Category"
-          onButtonClick={handleAdd}
+          action={
+            can("categories.create") ? (
+              <button
+                type="button"
+                onClick={handleAdd}
+                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                title="Add Category"
+              >
+                <Plus size={16} className="mr-2" />
+                Add Category
+              </button>
+            ) : null
+          }
         />
 
         {/* LOADING */}
@@ -166,12 +185,16 @@ const CategoriesPage = () => {
               No categories found
             </p>
 
-            <button
-              onClick={handleAdd}
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-              Add Category
-            </button>
+            {can("categories.create") && (
+              <button
+                onClick={handleAdd}
+                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                title="Add Category"
+              >
+                <Plus size={16} className="mr-2" />
+                Add Category
+              </button>
+            )}
           </div>
         )}
 
@@ -222,21 +245,27 @@ const CategoriesPage = () => {
           </td>
 
           <td className="p-3 flex gap-2">
-            <button
-              type="button"
-              onClick={() => handleEdit(category)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
-            >
-              Edit
-            </button>
+            {can("categories.update") && (
+              <button
+                type="button"
+                onClick={() => handleEdit(category)}
+                className="inline-flex items-center justify-center rounded-md bg-blue-500 text-white p-2 hover:bg-blue-600 transition-colors"
+                title="Edit Category"
+              >
+                <Edit2 size={16} />
+              </button>
+            )}
 
-            <button
-              type="button"
-              onClick={() => handleDelete(category._id)}
-              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-            >
-              Delete
-            </button>
+            {can("categories.delete") && (
+              <button
+                type="button"
+                onClick={() => handleDelete(category._id)}
+                className="inline-flex items-center justify-center rounded-md bg-red-500 text-white p-2 hover:bg-red-600 transition-colors"
+                title="Delete Category"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
           </td>
         </tr>
       ))}

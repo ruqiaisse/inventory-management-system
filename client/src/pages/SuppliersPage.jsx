@@ -1,11 +1,13 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
+import { Edit2, Trash2, Plus } from "lucide-react";
 
 import MainLayout from "../components/layout/MainLayout";
 import PageHeader from "../components/ui/PageHeader";
 import Modal from "../components/ui/Modal";
 import Toast from "../components/ui/Toast";
 import { getErrorMessage } from "../utils/api_helper";
+import usePermission from "../hooks/usePermission";
 
 import {
   getSuppliers,
@@ -34,6 +36,8 @@ const SuppliersPage = () => {
     phone: "",
     address: "",
   });
+
+  const { can } = usePermission();
 
   // LOAD SUPPLIERS
   const fetchSuppliers = async () => {
@@ -72,6 +76,8 @@ const SuppliersPage = () => {
 
   // OPEN ADD MODAL
   const handleAdd = () => {
+    if (!can("suppliers.create")) return;
+
     setSelectedSupplier(null);
 
     setFormData({
@@ -86,6 +92,8 @@ const SuppliersPage = () => {
 
   // OPEN EDIT MODAL
   const handleEdit = (supplier) => {
+    if (!can("suppliers.update")) return;
+
     setSelectedSupplier(supplier);
 
     setFormData({
@@ -151,8 +159,19 @@ const SuppliersPage = () => {
       <div className="p-6">
         <PageHeader
           title="Suppliers"
-          buttonText="Add Supplier"
-          onButtonClick={handleAdd}
+          action={
+            can("suppliers.create") ? (
+              <button
+                type="button"
+                onClick={handleAdd}
+                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                title="Add Supplier"
+              >
+                <Plus size={16} className="mr-2" />
+                Add Supplier
+              </button>
+            ) : null
+          }
         />
 
         {/* LOADING */}
@@ -172,12 +191,16 @@ const SuppliersPage = () => {
               No suppliers found
             </p>
 
-            <button
-              onClick={handleAdd}
-              className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-              Add Supplier
-            </button>
+            {can("suppliers.create") && (
+              <button
+                onClick={handleAdd}
+                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                title="Add Supplier"
+              >
+                <Plus size={16} className="mr-2" />
+                Add Supplier
+              </button>
+            )}
           </div>
         )}
 
@@ -234,21 +257,27 @@ const SuppliersPage = () => {
             </td>
 
             <td className="p-3 flex gap-2">
-              <button
-                type="button"
-                onClick={() => handleEdit(supplier)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
-              >
-                Edit
-              </button>
+              {can("suppliers.update") && (
+                <button
+                  type="button"
+                  onClick={() => handleEdit(supplier)}
+                  className="inline-flex items-center justify-center rounded-md bg-blue-500 text-white p-2 hover:bg-blue-600 transition-colors"
+                  title="Edit Supplier"
+                >
+                  <Edit2 size={16} />
+                </button>
+              )}
 
-              <button
-                type="button"
-                onClick={() => handleDelete(supplier._id)}
-                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-              >
-                Delete
-              </button>
+              {can("suppliers.delete") && (
+                <button
+                  type="button"
+                  onClick={() => handleDelete(supplier._id)}
+                  className="inline-flex items-center justify-center rounded-md bg-red-500 text-white p-2 hover:bg-red-600 transition-colors"
+                  title="Delete Supplier"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </td>
           </tr>
         ))}

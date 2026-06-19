@@ -3,7 +3,10 @@ import { useEffect, useState } from "react";
 import StatCard from "../components/ui/StatCard";
 import PageHeader from "../components/ui/PageHeader";
 import Toast from "../components/ui/Toast";
-import { getDashboardSummary } from "../services/dashboardService";
+import StockValueTrendChart from "../components/charts/StockValueTrendChart";
+import StockByCategoryChart from "../components/charts/StockByCategoryChart";
+import ProductStatusChart from "../components/charts/ProductStatusChart";
+import { getDashboardSummary, getDashboardCharts } from "../services/dashboardService";
 import { getUser } from "../services/authService";
 import usePermission from "../hooks/usePermission";
 
@@ -37,6 +40,7 @@ function DashboardPage() {
   const user = getUser() || {};
   const { can } = usePermission();
   const [summary, setSummary] = useState(null);
+  const [chartData, setChartData] = useState(null);
   const [error, setError] = useState("");
 
   const loadSummary = async () => {
@@ -49,8 +53,18 @@ function DashboardPage() {
     }
   };
 
+  const loadCharts = async () => {
+    try {
+      const data = await getDashboardCharts();
+      setChartData(data);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to load dashboard charts.");
+    }
+  };
+
   useEffect(() => {
     loadSummary();
+    loadCharts();
   }, []);
 
   return (
@@ -59,7 +73,10 @@ function DashboardPage() {
         title="Dashboard"
         subtitle={`Welcome back, ${user.name || "User"}`}
         buttonText="Refresh"
-        onButtonClick={loadSummary}
+        onButtonClick={() => {
+          loadSummary();
+          loadCharts();
+        }}
       />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -79,6 +96,12 @@ function DashboardPage() {
         )}
       </div>
 
+      <div className="grid gap-6 xl:grid-cols-3">
+        <StockValueTrendChart data={chartData?.stockValueTrend || []} />
+        <StockByCategoryChart data={chartData?.stockByCategory || []} />
+        <ProductStatusChart data={chartData?.productStatus || []} />
+      </div>
+
       <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 text-slate-700 dark:text-slate-300">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -87,7 +110,10 @@ function DashboardPage() {
           </div>
           <button
             type="button"
-            onClick={loadSummary}
+            onClick={() => {
+              loadSummary();
+              loadCharts();
+            }}
             className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700"
           >
             Refresh

@@ -6,11 +6,12 @@ import usePermission from "../../hooks/usePermission";
 
 const navItems = [
   { label: "Dashboard", path: "/dashboard", icon: "🏠" },
-  { label: "Products", path: "/products", icon: "📦" },
-  { label: "Categories", path: "/categories", icon: "📁" },
-  { label: "Suppliers", path: "/suppliers", icon: "🚚" },
-  { label: "Reports", path: "/reports", icon: "📊" },
-  { label: "Activity Log", path: "/activity", icon: "🕐" },
+  { label: "Products", path: "/products", icon: "📦", permission: "products.view" },
+  { label: "Categories", path: "/categories", icon: "📁", permission: "categories.view" },
+  { label: "Suppliers", path: "/suppliers", icon: "🚚", permission: "suppliers.view" },
+  { label: "Purchase Orders", path: "/purchase-orders", icon: "📋", permission: "purchase-orders.view" },
+  { label: "Reports", path: "/reports", icon: "📊", permission: "reports.view" },
+  { label: "Activity Log", path: "/activity", icon: "🕐", permission: "activity.view" },
 ];
 
 const adminItems = [
@@ -44,7 +45,7 @@ function Sidebar() {
     return () => window.removeEventListener("companyNameUpdated", onCompanyNameUpdated);
   }, []);
 
-  const visibleItems = navItems;
+  const visibleItems = navItems.filter((item) => !item.permission || can(item.permission));
   const visibleAdminItems = adminItems.filter((item) =>
     item.path === "/permissions" ? user?.role === "admin" : can(item.permission)
   );

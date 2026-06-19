@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState, useCallback } from "react";
+import { Edit2, Trash2, Plus } from "lucide-react";
 import PageHeader from "../components/ui/PageHeader";
 import Modal from "../components/ui/Modal";
 import Toast from "../components/ui/Toast";
@@ -165,8 +166,19 @@ function UsersPage() {
       <PageHeader
         title="Users"
         subtitle="Manage system users and permissions"
-        buttonText={can("users.create") ? "Add User" : undefined}
-        onButtonClick={openAddModal}
+        action={
+          can("users.create") ? (
+            <button
+              type="button"
+              onClick={openAddModal}
+              className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title="Add User"
+            >
+              <Plus size={16} className="mr-2" />
+              Add User
+            </button>
+          ) : null
+        }
       />
 
       {_error && <p className="text-sm text-red-600">{_error}</p>}
@@ -219,17 +231,19 @@ function UsersPage() {
                         <button
                           type="button"
                           onClick={() => openEditModal(user)}
-                          className="rounded-xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+                          title="Edit User"
                         >
-                          Edit
+                          <Edit2 size={16} />
                         </button>
                         <button
                           type="button"
                           disabled={currentUser?._id === user._id}
                           onClick={() => handleDelete(user)}
-                          className="rounded-xl bg-red-100 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-red-100 text-red-700 hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50 transition"
+                          title="Delete User"
                         >
-                          Delete
+                          <Trash2 size={16} />
                         </button>
                       </td>
                     </tr>

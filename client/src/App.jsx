@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import MainLayout from "./components/layout/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PermissionRoute from "./components/PermissionRoute";
 import AdminRoute from "./components/AdminRoute";
 import DashboardPage from "./pages/DashboardPage";
 import ProductsPage from "./pages/ProductsPage";
@@ -13,6 +14,7 @@ import ActivityPage from "./pages/ActivityPage";
 import UsersPage from "./pages/UsersPage";
 import SettingsPage from "./pages/SettingsPage";
 import PermissionsPage from "./pages/PermissionsPage";
+import PurchaseOrdersPage from "./pages/PurchaseOrdersPage";
 import LoginPage from "./pages/LoginPage";
 
 function App() {
@@ -48,7 +50,9 @@ function App() {
           path="/products"
           element={
             <ProtectedRoute>
-              <ProductsPage />
+              <PermissionRoute permission="products.view">
+                <ProductsPage />
+              </PermissionRoute>
             </ProtectedRoute>
           }
         />
@@ -57,7 +61,9 @@ function App() {
           path="/categories"
           element={
             <ProtectedRoute>
-              <CategoriesPage />
+              <PermissionRoute permission="categories.view">
+                <CategoriesPage />
+              </PermissionRoute>
             </ProtectedRoute>
           }
         />
@@ -66,7 +72,20 @@ function App() {
           path="/suppliers"
           element={
             <ProtectedRoute>
-              <SuppliersPage />
+              <PermissionRoute permission="suppliers.view">
+                <SuppliersPage />
+              </PermissionRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/purchase-orders"
+          element={
+            <ProtectedRoute>
+              <PermissionRoute permission="purchase-orders.view">
+                <PurchaseOrdersPage />
+              </PermissionRoute>
             </ProtectedRoute>
           }
         />
@@ -75,7 +94,11 @@ function App() {
           path="/reports"
           element={
             <ProtectedRoute>
-              <ReportsPage />
+              <PermissionRoute permission="reports.view">
+                <MainLayout title="Reports">
+                  <ReportsPage />
+                </MainLayout>
+              </PermissionRoute>
             </ProtectedRoute>
           }
         />
@@ -84,7 +107,9 @@ function App() {
           path="/activity"
           element={
             <ProtectedRoute>
-              <ActivityPage />
+              <PermissionRoute permission="activity.view">
+                <ActivityPage />
+              </PermissionRoute>
             </ProtectedRoute>
           }
         />
@@ -93,9 +118,11 @@ function App() {
           path="/users"
           element={
             <ProtectedRoute>
-              <MainLayout title="Users">
-                <UsersPage />
-              </MainLayout>
+              <PermissionRoute permission="users.view">
+                <MainLayout title="Users">
+                  <UsersPage />
+                </MainLayout>
+              </PermissionRoute>
             </ProtectedRoute>
           }
         />
@@ -104,9 +131,11 @@ function App() {
           path="/settings"
           element={
             <ProtectedRoute>
-              <MainLayout title="Settings">
-                <SettingsPage />
-              </MainLayout>
+              <PermissionRoute permission="settings.view">
+                <MainLayout title="Settings">
+                  <SettingsPage />
+                </MainLayout>
+              </PermissionRoute>
             </ProtectedRoute>
           }
         />

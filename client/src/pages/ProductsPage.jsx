@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState, useRef, useCallback } from "react";
+import { Edit2, Trash2, QrCode, Plus, FileText, FileSpreadsheet, Barcode } from "lucide-react";
 
 import MainLayout from "../components/layout/MainLayout";
 import PageHeader from "../components/ui/PageHeader";
@@ -10,6 +11,8 @@ import Tabs from "../components/ui/Tabs";
 import BarcodeScanner from "../components/ui/BarcodeScanner";
 import ProductImageUpload from "../components/products/ProductImageUpload";
 import ProductQRModal from "../components/products/ProductQRModal";
+import ErrorBoundary from "../components/ui/ErrorBoundary";
+import { useNavigate } from "react-router-dom";
 
 import {
   getProducts,
@@ -22,6 +25,7 @@ import {
 import {
   getCategories,
 } from "../services/categoryService";
+import { exportReport } from "../services/reportService";
 
 import { getUser } from "../services/authService";
 import usePermission from "../hooks/usePermission";
@@ -31,6 +35,8 @@ import {
 } from "../services/supplierService";
 
 import { getStockBadge } from "../utils/badgeHelpers";
+
+
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -51,12 +57,16 @@ const ProductsPage = () => {
     message: "",
     type: "success",
   });
+  const [exporting, setExporting] = useState(false);
+
+  
 
   // Filters & Search
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [supplierFilter, setSupplierFilter] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+
 
   const user = getUser();
   const { can } = usePermission();
@@ -224,6 +234,19 @@ const ProductsPage = () => {
     }
   };
 
+  const handleExport = async (format) => {
+    try {
+      setExporting(true);
+      await exportReport("products", format);
+      showToast(`Products ${format.toUpperCase()} export started`);
+    } catch (err) {
+      console.error("Export failed", err);
+      showToast(err.response?.data?.message || "Export failed", "error");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const handleScan = async (code) => {
     if (!code) {
       setShowScanner(false);
@@ -323,8 +346,41 @@ const ProductsPage = () => {
       <div className="p-6">
         <PageHeader
           title="Products"
-          buttonText={can("products.create") ? "Create New Product" : undefined}
-          onButtonClick={handleAdd}
+          action={
+            <div className="flex flex-wrap gap-3 items-center">
+              {can("products.create") && (
+                <button
+                  type="button"
+                  onClick={handleAdd}
+                  className="inline-flex items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title="Create New Product"
+                >
+                  <Plus size={16} className="mr-2" />
+                  New
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => handleExport("pdf")}
+                disabled={exporting || !can("reports.export")}
+                className="inline-flex items-center justify-center rounded-md bg-rose-500 px-3 py-2 text-sm font-medium text-white hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Export products as PDF"
+              >
+                <FileText size={16} className="mr-2" />
+                PDF
+              </button>
+              <button
+                type="button"
+                onClick={() => handleExport("excel")}
+                disabled={exporting || !can("reports.export")}
+                className="inline-flex items-center justify-center rounded-md bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Export products as Excel"
+              >
+                <FileSpreadsheet size={16} className="mr-2" />
+                Excel
+              </button>
+            </div>
+          }
         />
 
         {/* LOADING */}
@@ -367,9 +423,11 @@ const ProductsPage = () => {
                   setScannerMode("search");
                   setShowScanner(true);
                 }}
-                className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+                className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+                title="Scan to find a product"
               >
-                Scan to Find
+                <Barcode size={16} className="mr-2" />
+                Scan
               </button>
 
               <select
@@ -409,8 +467,10 @@ const ProductsPage = () => {
                 {can("products.create") && (
                   <button
                     onClick={handleAdd}
-                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                    className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                    title="Create New Product"
                   >
+                    <Plus size={16} className="mr-2" />
                     Create New Product
                   </button>
                 )}
@@ -506,26 +566,28 @@ const ProductsPage = () => {
                               {label}
                             </Badge>
                           </td>
-                          <td className="p-3 flex gap-2">
+                          <td className="p-3 flex gap-2 items-center">
                             <button
                               type="button"
                               onClick={() => {
                                 setQrProduct(product);
                                 setShowQRModal(true);
                               }}
-                              className="bg-slate-200 text-slate-900 px-3 py-1 rounded text-sm hover:bg-slate-300"
+                              className="inline-flex items-center justify-center rounded-md bg-slate-200 text-slate-900 p-2 hover:bg-slate-300 transition-colors"
+                              title="View QR Code"
                             >
-                              QR
+                              <QrCode size={18} />
                             </button>
                             {can("products.update") ? (
                               <button
                                 onClick={() => handleEdit(product)}
-                                className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                                className="inline-flex items-center justify-center rounded-md bg-blue-500 text-white p-2 hover:bg-blue-600 transition-colors"
+                                title="Edit Product"
                               >
-                                Edit
+                                <Edit2 size={18} />
                               </button>
                             ) : (
-                              <span className="text-slate-500 text-xs">No edit rights</span>
+                              <span className="text-slate-500 text-xs">No edit</span>
                             )}
 
                             {can("products.delete") ? (
@@ -533,9 +595,10 @@ const ProductsPage = () => {
                                 onClick={() =>
                                   handleDelete(product._id)
                                 }
-                                className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                                className="inline-flex items-center justify-center rounded-md bg-red-500 text-white p-2 hover:bg-red-600 transition-colors"
+                                title="Delete Product"
                               >
-                                Delete
+                                <Trash2 size={18} />
                               </button>
                             ) : null}
                           </td>
@@ -557,183 +620,189 @@ const ProductsPage = () => {
           }
           onClose={() => setIsModalOpen(false)}
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Product Name *
-                </label>
+          <form onSubmit={handleSubmit} className="flex flex-col max-h-[80vh]">
+            {/* Scrollable form content */}
+            <div className="overflow-y-auto space-y-4 pr-2 flex-1">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Product Name *
+                  </label>
 
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Product name"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  SKU *
-                </label>
-
-                <div className="flex gap-2">
                   <input
                     type="text"
-                    name="sku"
-                    value={formData.sku}
+                    name="name"
+                    value={formData.name}
                     onChange={handleChange}
                     required
                     className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="SKU-001"
+                    placeholder="Product name"
                   />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setScannerMode("fill-sku");
-                      setShowScanner(true);
-                    }}
-                    className="inline-flex items-center justify-center rounded-md bg-slate-100 px-3 text-sm text-slate-900 hover:bg-slate-200"
-                  >
-                    Scan
-                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    SKU *
+                  </label>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      name="sku"
+                      value={formData.sku}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="SKU-001"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setScannerMode("fill-sku");
+                        setShowScanner(true);
+                      }}
+                      className="inline-flex items-center justify-center rounded-md bg-slate-100 px-3 text-sm text-slate-900 hover:bg-slate-200"
+                      title="Scan SKU"
+                    >
+                      <Barcode size={16} className="mr-2" />
+                      Scan
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Description
-              </label>
-
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Product description"
-                rows="2"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Category *
-                </label>
-
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat._id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Supplier *
+                  Description
                 </label>
 
-                <select
-                  name="supplier"
-                  value={formData.supplier}
+                <textarea
+                  name="description"
+                  value={formData.description}
                   onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select Supplier</option>
-                  {suppliers.map((sup) => (
-                    <option key={sup._id} value={sup._id}>
-                      {sup.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Price *
-                </label>
-
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  required
-                  step="0.01"
-                  min="0"
                   className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0.00"
+                  placeholder="Product description"
+                  rows="2"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Stock Quantity
-                </label>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Category *
+                  </label>
 
-                <input
-                  type="number"
-                  name="stock"
-                  value={formData.stock}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0"
-                />
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((cat) => (
+                      <option key={cat._id} value={cat._id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Supplier *
+                  </label>
+
+                  <select
+                    name="supplier"
+                    value={formData.supplier}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Supplier</option>
+                    {suppliers.map((sup) => (
+                      <option key={sup._id} value={sup._id}>
+                        {sup.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Min Stock Level
-                </label>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Price *
+                  </label>
 
-                <input
-                  type="number"
-                  name="minStock"
-                  value={formData.minStock}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0"
-                />
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    required
+                    step="0.01"
+                    min="0"
+                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Stock Quantity
+                  </label>
+
+                  <input
+                    type="number"
+                    name="stock"
+                    value={formData.stock}
+                    onChange={handleChange}
+                    min="0"
+                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="0"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Unit
-                </label>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Min Stock Level
+                  </label>
 
-                <select
-                  name="unit"
-                  value={formData.unit}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="pcs">pcs</option>
-                  <option value="kg">kg</option>
-                  <option value="box">box</option>
-                  <option value="ltr">ltr</option>
-                  <option value="set">set</option>
-                </select>
+                  <input
+                    type="number"
+                    name="minStock"
+                    value={formData.minStock}
+                    onChange={handleChange}
+                    min="0"
+                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Unit
+                  </label>
+
+                  <select
+                    name="unit"
+                    value={formData.unit}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="pcs">pcs</option>
+                    <option value="kg">kg</option>
+                    <option value="box">box</option>
+                    <option value="ltr">ltr</option>
+                    <option value="set">set</option>
+                  </select>
+                </div>
               </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Barcode
@@ -757,24 +826,27 @@ const ProductsPage = () => {
                       }))
                     }
                     className="inline-flex items-center justify-center rounded-md bg-slate-100 px-3 text-sm text-slate-900 hover:bg-slate-200"
+                    title="Generate barcode"
                   >
+                    <Barcode size={16} className="mr-2" />
                     Generate
                   </button>
                 </div>
               </div>
+
+              <ProductImageUpload
+                currentImage={selectedProduct?.image}
+                onImageUploaded={(url) =>
+                  setFormData((prev) => ({ ...prev, image: url }))
+                }
+                onImageRemoved={() =>
+                  setFormData((prev) => ({ ...prev, image: "" }))
+                }
+              />
             </div>
 
-            <ProductImageUpload
-              currentImage={selectedProduct?.image}
-              onImageUploaded={(url) =>
-                setFormData((prev) => ({ ...prev, image: url }))
-              }
-              onImageRemoved={() =>
-                setFormData((prev) => ({ ...prev, image: "" }))
-              }
-            />
-
-            <div className="flex gap-3 justify-end mt-6">
+            {/* Fixed action buttons at bottom */}
+            <div className="flex gap-3 justify-end mt-6 border-t pt-4 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
@@ -801,11 +873,13 @@ const ProductsPage = () => {
         />
 
         {showScanner && (
+            <ErrorBoundary>
           <BarcodeScanner
             mode={scannerMode === "fill-sku" ? "qr" : "barcode"}
             onScan={handleScan}
             onClose={() => setShowScanner(false)}
           />
+          </ErrorBoundary>
         )}
 
         {/* TOAST */}

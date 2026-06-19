@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
+import { Save } from "lucide-react";
 import PageHeader from "../components/ui/PageHeader";
 import Toast from "../components/ui/Toast";
 import { getSettings, updateSettings } from "../services/settingsService";
@@ -150,6 +151,7 @@ function SettingsPage() {
             disabled={saving || loading}
             className="inline-flex items-center justify-center rounded-2xl bg-sky-600 px-6 py-3 text-sm font-semibold text-white hover:bg-sky-700 disabled:opacity-60"
           >
+            <Save size={16} className="mr-2" />
             {saving ? "Saving..." : "Save Settings"}
           </button>
         )}
