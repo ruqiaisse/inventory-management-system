@@ -9,7 +9,7 @@ const activityLogSchema = new mongoose.Schema(
 
     module: {
       type: String,
-      enum: ["products", "categories", "suppliers", "users"],
+      enum: ["products", "categories", "suppliers", "users", "Purchase Orders"],
       required: true
     },
 

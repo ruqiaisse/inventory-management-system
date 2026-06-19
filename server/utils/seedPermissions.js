@@ -110,6 +110,40 @@ const defaultPermissions = [
   
   { role: "staff", action: "activity.view", allowed: false },
   { role: "staff", action: "activity.clear", allowed: false },
+
+  // PURCHASE ORDERS
+  { role: "admin", action: "purchase-orders.create", allowed: true },
+  { role: "admin", action: "purchase-orders.view", allowed: true },
+  { role: "admin", action: "purchase-orders.update", allowed: true },
+  { role: "admin", action: "purchase-orders.submit", allowed: true },
+  { role: "admin", action: "purchase-orders.approve", allowed: true },
+  { role: "admin", action: "purchase-orders.receive", allowed: true },
+  { role: "admin", action: "purchase-orders.cancel", allowed: true },
+  { role: "admin", action: "purchase-orders.delete", allowed: true },
+  { role: "admin", action: "purchase-orders.upload", allowed: true },
+  { role: "admin", action: "purchase-orders.export", allowed: true },
+  
+  { role: "manager", action: "purchase-orders.create", allowed: true },
+  { role: "manager", action: "purchase-orders.view", allowed: true },
+  { role: "manager", action: "purchase-orders.update", allowed: true },
+  { role: "manager", action: "purchase-orders.submit", allowed: true },
+  { role: "manager", action: "purchase-orders.approve", allowed: true },
+  { role: "manager", action: "purchase-orders.receive", allowed: true },
+  { role: "manager", action: "purchase-orders.cancel", allowed: true },
+  { role: "manager", action: "purchase-orders.delete", allowed: false },
+  { role: "manager", action: "purchase-orders.upload", allowed: true },
+  { role: "manager", action: "purchase-orders.export", allowed: true },
+  
+  { role: "staff", action: "purchase-orders.create", allowed: false },
+  { role: "staff", action: "purchase-orders.view", allowed: true },
+  { role: "staff", action: "purchase-orders.update", allowed: false },
+  { role: "staff", action: "purchase-orders.submit", allowed: false },
+  { role: "staff", action: "purchase-orders.approve", allowed: false },
+  { role: "staff", action: "purchase-orders.receive", allowed: true },
+  { role: "staff", action: "purchase-orders.cancel", allowed: false },
+  { role: "staff", action: "purchase-orders.delete", allowed: false },
+  { role: "staff", action: "purchase-orders.upload", allowed: true },
+  { role: "staff", action: "purchase-orders.export", allowed: false },
 ];
 
 const seedPermissions = async () => {

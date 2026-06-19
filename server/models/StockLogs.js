@@ -5,42 +5,38 @@ const stockLogSchema = new mongoose.Schema(
     product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
-      required: true
+      required: true,
+      index: true,
     },
-
     type: {
       type: String,
       enum: ["add", "deduct"],
-      required: true
+      required: true,
     },
     quantity: {
       type: Number,
       required: true,
-      min: [1, "Quantity must be at least 1"]
+      min: [1, "Quantity must be at least 1"],
     },
-
-    stockBefore: {
+    beforeStock: {
       type: Number,
-      required: true
+      required: true,
     },
-
-    stockAfter: {
+    afterStock: {
       type: Number,
-      required: true
+      required: true,
     },
-
-    note: {
-      type: String
-    },
-
-    createdBy: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true
-    }
+    },
+    note: {
+      type: String,
+      default: "",
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const { protect } = require("../middleware/authMiddleware");
-const { allowRoles } = require("../middleware/roleMiddleware");
+const checkPermission = require("../middleware/permissionMiddleware");
 
 const {
   getCategories,
@@ -12,10 +12,10 @@ const {
 
 const router = express.Router();
 
-router.get("/", protect, getCategories);
-router.get("/:id", protect, getCategoryById);
-router.post("/", protect, allowRoles("admin", "manager"), createCategory);
-router.put("/:id", protect, allowRoles("admin", "manager"), updateCategory);
-router.delete("/:id", protect, allowRoles("admin"), deleteCategory);
+router.get("/", protect, checkPermission("categories.view"), getCategories);
+router.get("/:id", protect, checkPermission("categories.view"), getCategoryById);
+router.post("/", protect, checkPermission("categories.create"), createCategory);
+router.put("/:id", protect, checkPermission("categories.update"), updateCategory);
+router.delete("/:id", protect, checkPermission("categories.delete"), deleteCategory);
 
 module.exports = router;

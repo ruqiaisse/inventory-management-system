@@ -1,26 +1,29 @@
 const express = require("express");
-
-const router = express.Router();
-
+const { protect } = require("../middleware/authMiddleware");
+const { allowRoles } = require("../middleware/roleMiddleware");
 const {
   addStock,
   deductStock,
+  getStockLogs,
+  getAllStockLogs,
+  getStockSummary,
 } = require("../controllers/stockController");
 
-const authMiddleware = require("../middleware/authMiddleware");
+const router = express.Router();
 
-// ADD STOCK
-router.post(
-  "/:id/stock/add",
-  authMiddleware,
-  addStock
-);
+// Add stock to a product
+router.post("/:productId/add", protect, allowRoles("admin", "manager"), addStock);
 
-// DEDUCT STOCK
-router.post(
-  "/:id/stock/deduct",
-  authMiddleware,
-  deductStock
-);
+// Deduct stock from a product
+router.post("/:productId/deduct", protect, allowRoles("admin", "manager"), deductStock);
+
+// Get stock logs for a specific product
+router.get("/:productId/logs", protect, getStockLogs);
+
+// Get all stock logs
+router.get("/logs/all", protect, getAllStockLogs);
+
+// Get stock summary
+router.get("/summary", protect, getStockSummary);
 
 module.exports = router;

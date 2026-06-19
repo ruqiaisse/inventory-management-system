@@ -17,6 +17,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.use("/uploads", express.static("uploads"));
 
+
 app.get("/", (req, res) => {
   res.send("Inventory API Running...");
 });
@@ -40,6 +41,8 @@ app.use("/api/activity", require("./routes/activityRoutes"));
 app.use("/api/reports", require("./routes/reportRoutes"));
 app.use("/api/upload", require("./routes/uploadRoutes"));
 app.use("/api/permissions", require("./routes/permissionRoutes"));
+app.use("/api/stock", require("./routes/stockRoutes"));
+app.use("/api/purchase-orders", require("./routes/purchaseOrderRoutes"));
 
 const PORT = process.env.PORT || 5000;
 

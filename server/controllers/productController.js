@@ -49,7 +49,7 @@ const getProducts = async (req, res) => {
 const findByBarcode = async (req, res) => {
   try {
     const code = (req.params.code || "").trim();
-    const product = await Product.findOne({ sku: { $regex: `^${code}$`, $options: "i" } })
+    const product = await Product.findOne({ barcode: { $regex: `^${code}$`, $options: "i" } })
       .populate("category", "name")
       .populate("supplier", "name email")
       .populate("createdBy", "name email");

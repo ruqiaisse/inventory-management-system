@@ -1,6 +1,6 @@
 const express = require("express");
 const { protect } = require("../middleware/authMiddleware");
-const { allowRoles } = require("../middleware/roleMiddleware");
+const checkPermission = require("../middleware/permissionMiddleware");
 
 const {
   getProducts,
@@ -14,12 +14,12 @@ const {
 
 const router = express.Router();
 
-router.get("/", protect, getProducts);
-router.get("/barcode/:code", protect, findByBarcode);
-router.get("/:id/qr", protect, generateProductQR);
-router.get("/:id", protect, getProductById);
-router.post("/", protect, allowRoles("admin", "manager"), createProduct);
-router.put("/:id", protect, allowRoles("admin", "manager"), updateProduct);
-router.delete("/:id", protect, allowRoles("admin"), deleteProduct);
+router.get("/", protect, checkPermission("products.view"), getProducts);
+router.get("/barcode/:code", protect, checkPermission("products.view"), findByBarcode);
+router.get("/:id/qr", protect, checkPermission("products.view"), generateProductQR);
+router.get("/:id", protect, checkPermission("products.view"), getProductById);
+router.post("/", protect, checkPermission("products.create"), createProduct);
+router.put("/:id", protect, checkPermission("products.update"), updateProduct);
+router.delete("/:id", protect, checkPermission("products.delete"), deleteProduct);
 
 module.exports = router;
