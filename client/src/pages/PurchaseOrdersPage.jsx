@@ -334,7 +334,7 @@ function PurchaseOrdersPage() {
             setSelectedPO(null);
           }}
         >
-          <div className="max-h-[80vh] overflow-y-auto pr-2">
+          <div className="pr-2">
             <POForm
               selectedPO={selectedPO}
               onSubmit={handleFormSubmit}

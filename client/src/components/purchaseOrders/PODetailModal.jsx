@@ -91,7 +91,7 @@ function PODetailModal({ isOpen, onClose, po, onAction }) {
 
   return (
     <Modal isOpen={isOpen} title="Purchase Order Details" onClose={onClose}>
-      <div className="space-y-6 max-h-[80vh] overflow-y-auto">
+      <div className="space-y-6">
         <div className="p-4 rounded-lg" style={{
           background: "linear-gradient(90deg, var(--panel-bg) 0%, var(--bg-secondary) 100%)",
           border: "1px solid var(--border-color)",
