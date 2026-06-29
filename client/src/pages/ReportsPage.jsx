@@ -5,6 +5,8 @@ import { exportReport } from "../services/reportService";
 import usePermission from "../hooks/usePermission";
 import { getToken } from "../utils/api_helper";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
 const TABS = [
   { id: "products", label: "Products", hasDateFilter: true },
   { id: "stock", label: "Stock", hasDateFilter: false },
@@ -126,7 +128,7 @@ function ReportsPage() {
       let data = [];
 
       if (activeTab === "products") {
-        const response = await fetch("/api/products", { headers });
+        const response = await fetch(`${API_BASE_URL}/products`, { headers });
         if (!response.ok) throw new Error("Failed to fetch products");
         const result = await response.json();
         const products = result.data || result || [];
@@ -150,7 +152,7 @@ function ReportsPage() {
         // Filter by date if provided
         data = filterByDate(data, "createdAt");
       } else if (activeTab === "stock") {
-        const response = await fetch("/api/products", { headers });
+        const response = await fetch(`${API_BASE_URL}/products`, { headers });
         if (!response.ok) throw new Error("Failed to fetch products");
         const result = await response.json();
         const products = result.data || result || [];
@@ -169,7 +171,7 @@ function ReportsPage() {
               : "In Stock",
         }));
       } else if (activeTab === "categories") {
-        const response = await fetch("/api/categories", { headers });
+        const response = await fetch(`${API_BASE_URL}/categories`, { headers });
         if (!response.ok) throw new Error("Failed to fetch categories");
         const result = await response.json();
         const categories = normalizeResponseArray(result);
@@ -177,7 +179,7 @@ function ReportsPage() {
         // Get categories with product count
         const categoriesPromise = categories.map(async (category) => {
           try {
-            const productsRes = await fetch(`/api/products?category=${category._id}`, { headers });
+            const productsRes = await fetch(`${API_BASE_URL}/products?category=${category._id}`, { headers });
             const productsResult = await productsRes.json();
             const products = normalizeResponseArray(productsResult);
             const count = products.length;
@@ -200,7 +202,7 @@ function ReportsPage() {
         
         data = await Promise.all(categoriesPromise);
       } else if (activeTab === "suppliers") {
-        const response = await fetch("/api/suppliers", { headers });
+        const response = await fetch(`${API_BASE_URL}/suppliers`, { headers });
         if (!response.ok) throw new Error("Failed to fetch suppliers");
         const result = await response.json();
         const suppliers = normalizeResponseArray(result);
@@ -208,7 +210,7 @@ function ReportsPage() {
         // Get suppliers with product count
         const suppliersPromise = suppliers.map(async (supplier) => {
           try {
-            const productsRes = await fetch(`/api/products?supplier=${supplier._id}`, { headers });
+            const productsRes = await fetch(`${API_BASE_URL}/products?supplier=${supplier._id}`, { headers });
             const productsResult = await productsRes.json();
             const products = normalizeResponseArray(productsResult);
             const count = products.length;
@@ -233,7 +235,7 @@ function ReportsPage() {
         
         data = await Promise.all(suppliersPromise);
       } else if (activeTab === "activity") {
-        const response = await fetch("/api/activity", { headers });
+        const response = await fetch(`${API_BASE_URL}/activity`, { headers });
         if (!response.ok) throw new Error("Failed to fetch activity logs");
         const result = await response.json();
         const logs = result.data || result || [];
@@ -252,7 +254,7 @@ function ReportsPage() {
         // Filter by date if provided
         data = filterByDate(data, "createdAt");
       } else if (activeTab === "sales") {
-        const response = await fetch("/api/sales", { headers });
+        const response = await fetch(`${API_BASE_URL}/sales`, { headers });
         if (!response.ok) throw new Error("Failed to fetch sales");
         const result = await response.json();
         const sales = result.sales || result.data || result || [];
@@ -270,7 +272,7 @@ function ReportsPage() {
 
         data = filterByDate(data, "createdAt");
       } else if (activeTab === "customers") {
-        const response = await fetch("/api/customers", { headers });
+        const response = await fetch(`${API_BASE_URL}/customers`, { headers });
         if (!response.ok) throw new Error("Failed to fetch customers");
         const result = await response.json();
         const customers = result.customers || result.data || result || [];
