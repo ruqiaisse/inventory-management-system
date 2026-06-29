@@ -1,29 +1,41 @@
 const nodemailer = require("nodemailer");
 
+const emailHost = process.env.EMAIL_HOST?.trim();
+const emailPort = parseInt(process.env.EMAIL_PORT || "587", 10);
+const emailUser = process.env.EMAIL_USER?.trim();
+const emailPass = process.env.EMAIL_PASS?.trim();
+const emailSecure = process.env.EMAIL_SECURE === "true" || emailPort === 465;
+const emailTlsRejectUnauthorized = process.env.EMAIL_REJECT_UNAUTHORIZED !== "false";
+
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT || "587", 10),
-  secure: false,
+  host: emailHost,
+  port: emailPort,
+  secure: emailSecure,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: emailUser,
+    pass: emailPass,
   },
   tls: {
-    rejectUnauthorized: false,
+    rejectUnauthorized: emailTlsRejectUnauthorized,
   },
   connectionTimeout: 10000,
   greetingTimeout: 10000,
   socketTimeout: 10000,
 });
 
-// Verify connection
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("❌ Email Config Error:", error.message);
-  } else {
-    console.log("✅ Email Config Valid - Ready to send emails!");
-  }
-});
+if (!emailHost || !emailUser || !emailPass) {
+  console.error(
+    "❌ Email SMTP configuration is missing. Make sure EMAIL_HOST, EMAIL_USER, and EMAIL_PASS are set."
+  );
+} else {
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error("❌ Email Config Error:", error.message);
+    } else {
+      console.log("✅ Email Config Valid - Ready to send emails!");
+    }
+  });
+}
 
 const sendEmail = async (to, subject, html) => {
   if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {

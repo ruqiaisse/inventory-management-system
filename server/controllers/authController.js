@@ -11,9 +11,10 @@ const { passwordResetEmail } = require("../utils/emailTemplates");
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    const normalizedEmail = (email || "").toLowerCase().trim();
 
     // check existing user
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
 
     if (existingUser) {
       return res.status(400).json({ message: "Email already registered" });
@@ -25,7 +26,7 @@ const registerUser = async (req, res) => {
     // create user
     const user = await User.create({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       role,
     });
