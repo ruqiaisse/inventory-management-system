@@ -171,7 +171,7 @@ function UsersPage() {
             <button
               type="button"
               onClick={openAddModal}
-              className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="inline-flex items-center justify-center rounded-md theme-btn-primary"
               title="Add User"
             >
               <Plus size={16} className="mr-2" />
@@ -181,18 +181,18 @@ function UsersPage() {
         }
       />
 
-      {_error && <p className="text-sm text-red-600">{_error}</p>}
+      {_error && <p className="text-sm theme-text-danger">{_error}</p>}
 
       {!can("users.view") ? (
-        <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 text-slate-700 dark:text-slate-300">
+        <div className="rounded-3xl theme-card p-6">
           Access denied
         </div>
       ) : (
-        <div className="overflow-hidden rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 text-slate-700 dark:text-slate-300">
+        <div className="overflow-hidden rounded-3xl theme-card p-6">
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
+            <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400">
+                <tr className="border-b theme-border theme-text-secondary">
                   <th className="py-4 px-3">#</th>
                   <th className="py-4 px-3">Name</th>
                   <th className="py-4 px-3">Email</th>
@@ -205,24 +205,24 @@ function UsersPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="7" className="py-10 px-3 text-center text-slate-500 dark:text-slate-400">
+                    <td colSpan="7" className="py-10 px-3 text-center theme-text-secondary">
                       Loading users...
                     </td>
                   </tr>
                 ) : users.length ? (
                   users.map((user, index) => (
-                    <tr key={user._id} className="border-b border-slate-200 dark:border-slate-700">
+                    <tr key={user._id} className="border-b theme-border">
                       <td className="py-4 px-3">{index + 1}</td>
                       <td className="py-4 px-3 flex items-center gap-3">
                         {renderAvatar(user.name, user.role)}
                         <div>
-                          <div className="font-semibold text-slate-900 dark:text-slate-100">{user.name}</div>
+                          <div className="font-semibold theme-text-primary">{user.name}</div>
                         </div>
                       </td>
                       <td className="py-4 px-3">{user.email}</td>
                       <td className="py-4 px-3">{roleBadge(user.role)}</td>
                       <td className="py-4 px-3">
-                        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${user.isActive ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+                        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${user.isActive ? "theme-badge-success" : "theme-badge-muted"}`}>
                           {user.isActive ? "Active" : "Inactive"}
                         </span>
                       </td>
@@ -231,7 +231,7 @@ function UsersPage() {
                         <button
                           type="button"
                           onClick={() => openEditModal(user)}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+                          className="theme-icon-btn theme-icon-btn-secondary"
                           title="Edit User"
                         >
                           <Edit2 size={16} />
@@ -240,7 +240,7 @@ function UsersPage() {
                           type="button"
                           disabled={currentUser?._id === user._id}
                           onClick={() => handleDelete(user)}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-red-100 text-red-700 hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50 transition"
+                          className="theme-icon-btn theme-btn-danger disabled:cursor-not-allowed disabled:opacity-50"
                           title="Delete User"
                         >
                           <Trash2 size={16} />
@@ -250,7 +250,7 @@ function UsersPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="py-10 px-3 text-center text-slate-500 dark:text-slate-400">
+                    <td colSpan="7" className="py-10 px-3 text-center theme-text-secondary">
                       No users found.
                     </td>
                   </tr>
@@ -264,49 +264,49 @@ function UsersPage() {
       <Modal isOpen={isModalOpen} onClose={closeModal} title={modalMode === "add" ? "Add User" : "Edit User"}>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Full Name</label>
+            <label className="block text-sm font-medium theme-text-primary mb-2">Full Name</label>
             <input
               name="name"
               value={formData.name}
               onChange={handleChange}
               placeholder="Ahmed Hassan"
-              className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-slate-900 dark:text-slate-100 outline-none"
+              className="w-full theme-input"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
+            <label className="block text-sm font-medium theme-text-primary mb-2">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="user@example.com"
-              className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-slate-900 dark:text-slate-100 outline-none"
+              className="w-full theme-input"
             />
           </div>
 
           {modalMode === "add" && (
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Password</label>
+            <label className="block text-sm font-medium theme-text-primary mb-2">Password</label>
               <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Enter password"
-                className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-slate-900 dark:text-slate-100 outline-none"
+                className="w-full theme-input"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Role</label>
+            <label className="block text-sm font-medium theme-text-primary mb-2">Role</label>
             <select
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-slate-900 dark:text-slate-100 outline-none"
+              className="w-full theme-input"
             >
               <option value="staff">Staff</option>
               <option value="manager">Manager</option>
@@ -323,7 +323,7 @@ function UsersPage() {
               onChange={handleChange}
               className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
             />
-            <label htmlFor="isActive" className="text-sm text-slate-700 dark:text-slate-300">
+            <label htmlFor="isActive" className="text-sm theme-text-primary">
               Active account
             </label>
           </div>
@@ -332,13 +332,13 @@ function UsersPage() {
             <button
               type="button"
               onClick={closeModal}
-              className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="theme-btn-secondary"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-2xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700"
+              className="theme-btn-primary"
             >
               {modalMode === "add" ? "Create User" : "Save Changes"}
             </button>

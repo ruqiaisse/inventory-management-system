@@ -98,35 +98,60 @@ function QRCodeDisplay({ productId, productName, sku }) {
   }
 
   return (
-    <div className="space-y-4 text-center">
+    <div className="space-y-4 text-center" style={{ color: "var(--text-primary)" }}>
       {qrDataUrl ? (
         <img
           src={qrDataUrl}
           alt={`QR code for ${productName}`}
-          className="mx-auto h-52 w-52 rounded-3xl border border-slate-200 bg-white p-2"
+          className="mx-auto h-52 w-52 rounded-3xl border p-2"
+          style={{
+            borderColor: "var(--border-color)",
+            backgroundColor: "var(--card-bg)",
+          }}
         />
       ) : (
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-16 text-slate-500">
+        <div
+          className="rounded-3xl border p-16"
+          style={{
+            borderColor: "var(--border-color)",
+            backgroundColor: "var(--panel-bg)",
+            color: "var(--text-secondary)",
+          }}
+        >
           QR code unavailable
         </div>
       )}
       <div>
-        <p className="text-sm font-semibold text-slate-900">{productName}</p>
-        <p className="text-sm text-slate-500">SKU: {sku}</p>
+        <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+          {productName}
+        </p>
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          SKU: {sku}
+        </p>
       </div>
 
       <div className="flex flex-wrap justify-center gap-3">
         <button
           type="button"
           onClick={downloadQr}
-          className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-700"
+          className="rounded-lg px-4 py-2 text-sm transition hover:opacity-90"
+          style={{
+            backgroundColor: "var(--text-primary)",
+            color: "var(--text-inverse)",
+            border: "1px solid var(--border-color)",
+          }}
         >
           Download QR
         </button>
         <button
           type="button"
           onClick={printLabel}
-          className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 hover:bg-slate-50"
+          className="rounded-lg px-4 py-2 text-sm transition hover:opacity-90"
+          style={{
+            border: "1px solid var(--border-color)",
+            backgroundColor: "var(--bg-primary)",
+            color: "var(--text-primary)",
+          }}
         >
           Print Label
         </button>

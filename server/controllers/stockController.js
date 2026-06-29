@@ -2,6 +2,7 @@ const Product = require("../models/Product");
 const StockLog = require("../models/StockLogs");
 const { logActivity } = require("../utils/activityLogger");
 const { translateError } = require("../utils/errorTranslator");
+const { sendLowStockAlert } = require("../utils/stockAlerts");
 
 // ADD STOCK
 const addStock = async (req, res) => {
@@ -35,6 +36,8 @@ const addStock = async (req, res) => {
       user: req.user?._id,
       note: note || "",
     });
+
+    await sendLowStockAlert(product, beforeStock, product.minStock);
 
     // Log activity
     await logActivity(
@@ -92,6 +95,8 @@ const deductStock = async (req, res) => {
       user: req.user?._id,
       note: note || "",
     });
+
+    await sendLowStockAlert(product, beforeStock, product.minStock);
 
     // Log activity
     await logActivity(

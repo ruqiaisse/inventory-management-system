@@ -81,32 +81,84 @@ function SettingsPage() {
       <PageHeader title="Settings" subtitle="Review and manage system settings" />
 
       {!can("settings.update") && (
-        <div className="rounded-3xl bg-amber-50 border border-amber-200 p-4 text-amber-800">
+        <div
+          className="rounded-2xl border p-4 transition-colors duration-300"
+          style={{
+            backgroundColor: "var(--color-warning-light)",
+            borderColor: "var(--color-warning)",
+            color: "var(--color-warning-dark)",
+          }}
+        >
           You don't have permission to change settings.
         </div>
       )}
 
-      <form onSubmit={handleSave} className="space-y-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 text-slate-700 dark:text-slate-300">
+      <form
+        onSubmit={handleSave}
+        className="space-y-6 rounded-2xl border p-6 transition-colors duration-300"
+        style={{
+          backgroundColor: "var(--card-bg)",
+          borderColor: "var(--border-color)",
+        }}
+      >
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Company Name</label>
+            <label
+              className="block text-sm font-medium transition-colors duration-300"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Company Name
+            </label>
             <input
               type="text"
               value={settings.companyName}
               onChange={(e) => handleChange("companyName", e.target.value)}
               disabled={!can("settings.update") || loading}
               placeholder="InvenPro Ltd"
-              className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-slate-900 dark:text-slate-100 outline-none"
+              className="w-full rounded-lg px-4 py-3 text-sm font-medium outline-none transition-all duration-300"
+              style={{
+                backgroundColor: "var(--input-bg)",
+                borderColor: "var(--input-border)",
+                border: "1px solid",
+                color: "var(--input-text)",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "var(--input-focus-border)";
+                e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "var(--input-border)";
+                e.target.style.boxShadow = "none";
+              }}
             />
           </div>
 
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Currency</label>
+            <label
+              className="block text-sm font-medium transition-colors duration-300"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Currency
+            </label>
             <select
               value={settings.currency}
               onChange={(e) => handleChange("currency", e.target.value)}
               disabled={!can("settings.update") || loading}
-              className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-slate-900 dark:text-slate-100 outline-none"
+              className="w-full rounded-lg px-4 py-3 text-sm font-medium outline-none transition-all duration-300"
+              style={{
+                backgroundColor: "var(--input-bg)",
+                borderColor: "var(--input-border)",
+                border: "1px solid",
+                color: "var(--input-text)",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "var(--input-focus-border)";
+                e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "var(--input-border)";
+                e.target.style.boxShadow = "none";
+              }}
             >
               {currencyOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -119,26 +171,58 @@ function SettingsPage() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Low Stock Threshold</label>
+            <label
+              className="block text-sm font-medium transition-colors duration-300"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Low Stock Threshold
+            </label>
             <input
               type="number"
               value={settings.lowStockThreshold}
               onChange={(e) => handleChange("lowStockThreshold", Number(e.target.value))}
               disabled={!can("settings.update") || loading}
               placeholder="10"
-              className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-slate-900 dark:text-slate-100 outline-none"
+              className="w-full rounded-lg px-4 py-3 text-sm font-medium outline-none transition-all duration-300"
+              style={{
+                backgroundColor: "var(--input-bg)",
+                borderColor: "var(--input-border)",
+                border: "1px solid",
+                color: "var(--input-text)",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "var(--input-focus-border)";
+                e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "var(--input-border)";
+                e.target.style.boxShadow = "none";
+              }}
             />
-            <p className="text-sm text-slate-500 dark:text-slate-400">Products with stock below this number will be flagged.</p>
+            <p
+              className="text-sm transition-colors duration-300"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Products with stock below this number will be flagged.
+            </p>
           </div>
 
           <div className="space-y-3">
-            <label className="flex items-center gap-3 text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label
+              className="flex items-center gap-3 text-sm font-medium transition-colors duration-300"
+              style={{ color: "var(--text-primary)" }}
+            >
               <input
                 type="checkbox"
                 checked={settings.allowRegistration}
                 onChange={(e) => handleChange("allowRegistration", e.target.checked)}
                 disabled={!can("settings.update") || loading}
-                className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                className="h-4 w-4 rounded outline-none transition-colors duration-300 cursor-pointer"
+                style={{
+                  borderColor: "var(--input-border)",
+                  border: "1px solid",
+                  accentColor: "var(--color-primary)",
+                }}
               />
               Allow new users to self-register
             </label>
@@ -149,17 +233,43 @@ function SettingsPage() {
           <button
             type="submit"
             disabled={saving || loading}
-            className="inline-flex items-center justify-center rounded-2xl bg-sky-600 px-6 py-3 text-sm font-semibold text-white hover:bg-sky-700 disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-semibold transition-all duration-300"
+            style={{
+              backgroundColor: "var(--button-primary-bg)",
+              color: "var(--button-primary-text)",
+              opacity: saving || loading ? 0.6 : 1,
+              cursor: saving || loading ? "not-allowed" : "pointer",
+            }}
+            onMouseEnter={(e) => {
+              if (!saving && !loading) {
+                e.target.style.backgroundColor = "var(--button-primary-hover)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = "var(--button-primary-bg)";
+            }}
           >
             <Save size={16} className="mr-2" />
             {saving ? "Saving..." : "Save Settings"}
           </button>
         )}
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p
+            className="text-sm transition-colors duration-300"
+            style={{ color: "var(--color-danger)" }}
+          >
+            {error}
+          </p>
+        )}
       </form>
 
-      <Toast message={toast.message} type={toast.type} visible={toast.visible} onClose={() => setToast((prev) => ({ ...prev, visible: false }))} />
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        visible={toast.visible}
+        onClose={() => setToast((prev) => ({ ...prev, visible: false }))}
+      />
     </div>
   );
 }

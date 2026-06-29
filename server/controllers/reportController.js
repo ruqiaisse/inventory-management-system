@@ -3,6 +3,8 @@ const ExcelJS = require("exceljs");
 const Product = require("../models/Product");
 const Category = require("../models/Category");
 const Supplier = require("../models/Supplier");
+const Customer = require("../models/Customer");
+const Sale = require("../models/Sale");
 const ActivityLog = require("../models/ActivityLog");
 const StockLog = require("../models/StockLogs"); // Make sure this model exists
 
@@ -458,6 +460,136 @@ const getActivityExcel = async (req, res) => {
   }
 };
 
+const getSalesPdf = async (req, res) => {
+  try {
+    const filter = buildDateFilter(req.query);
+    const sales = await Sale.find(filter)
+      .populate("customer", "name customerCode")
+      .populate("createdBy", "name")
+      .sort({ createdAt: -1 });
+
+    const rows = sales.map((sale) => ({
+      invoiceNumber: sale.invoiceNumber || "-",
+      customer: sale.customer?.name || "-",
+      items: sale.items?.length || 0,
+      totalAmount: `$${(sale.totalAmount || 0).toFixed(2)}`,
+      paymentMethod: sale.paymentMethod || "-",
+      status: sale.status || "-",
+      date: sale.createdAt ? new Date(sale.createdAt).toLocaleDateString() : "-",
+    }));
+
+    const columns = [
+      { header: "Invoice", key: "invoiceNumber", width: 80 },
+      { header: "Customer", key: "customer", width: 120 },
+      { header: "Items", key: "items", width: 50 },
+      { header: "Total", key: "totalAmount", width: 70 },
+      { header: "Payment", key: "paymentMethod", width: 80 },
+      { header: "Status", key: "status", width: 70 },
+      { header: "Date", key: "date", width: 70 },
+    ];
+
+    createPdfResponse(res, "sales-report.pdf", "Sales Report", columns, rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getSalesExcel = async (req, res) => {
+  try {
+    const filter = buildDateFilter(req.query);
+    const sales = await Sale.find(filter)
+      .populate("customer", "name customerCode")
+      .populate("createdBy", "name")
+      .sort({ createdAt: -1 });
+
+    const rows = sales.map((sale) => ({
+      invoiceNumber: sale.invoiceNumber || "-",
+      customer: sale.customer?.name || "-",
+      items: sale.items?.length || 0,
+      totalAmount: (sale.totalAmount || 0).toFixed(2),
+      paymentMethod: sale.paymentMethod || "-",
+      status: sale.status || "-",
+      date: sale.createdAt ? new Date(sale.createdAt).toLocaleDateString() : "-",
+    }));
+
+    const columns = [
+      { header: "Invoice", key: "invoiceNumber", width: 15 },
+      { header: "Customer", key: "customer", width: 25 },
+      { header: "Items", key: "items", width: 10 },
+      { header: "Total", key: "totalAmount", width: 12 },
+      { header: "Payment", key: "paymentMethod", width: 15 },
+      { header: "Status", key: "status", width: 12 },
+      { header: "Date", key: "date", width: 12 },
+    ];
+
+    await createExcelResponse(res, "sales-report.xlsx", "Sales", columns, rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getCustomersPdf = async (req, res) => {
+  try {
+    const filter = buildDateFilter(req.query);
+    const customers = await Customer.find(filter)
+      .populate("createdBy", "name")
+      .sort({ createdAt: -1 });
+
+    const rows = customers.map((customer) => ({
+      customerCode: customer.customerCode || "-",
+      name: customer.name || "-",
+      phone: customer.phone || "-",
+      email: customer.email || "-",
+      status: customer.status || "-",
+      date: customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : "-",
+    }));
+
+    const columns = [
+      { header: "Code", key: "customerCode", width: 70 },
+      { header: "Name", key: "name", width: 120 },
+      { header: "Phone", key: "phone", width: 80 },
+      { header: "Email", key: "email", width: 120 },
+      { header: "Status", key: "status", width: 70 },
+      { header: "Date", key: "date", width: 70 },
+    ];
+
+    createPdfResponse(res, "customers-report.pdf", "Customers Report", columns, rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getCustomersExcel = async (req, res) => {
+  try {
+    const filter = buildDateFilter(req.query);
+    const customers = await Customer.find(filter)
+      .populate("createdBy", "name")
+      .sort({ createdAt: -1 });
+
+    const rows = customers.map((customer) => ({
+      customerCode: customer.customerCode || "-",
+      name: customer.name || "-",
+      phone: customer.phone || "-",
+      email: customer.email || "-",
+      status: customer.status || "-",
+      date: customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : "-",
+    }));
+
+    const columns = [
+      { header: "Code", key: "customerCode", width: 15 },
+      { header: "Name", key: "name", width: 25 },
+      { header: "Phone", key: "phone", width: 15 },
+      { header: "Email", key: "email", width: 25 },
+      { header: "Status", key: "status", width: 12 },
+      { header: "Date", key: "date", width: 12 },
+    ];
+
+    await createExcelResponse(res, "customers-report.xlsx", "Customers", columns, rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getProductsPdf,
   getProductsExcel,
@@ -469,4 +601,8 @@ module.exports = {
   getSuppliersExcel,
   getActivityPdf,
   getActivityExcel,
+  getSalesPdf,
+  getSalesExcel,
+  getCustomersPdf,
+  getCustomersExcel,
 };

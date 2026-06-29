@@ -6,7 +6,12 @@ function ExportButtons({ onExport, disabled }) {
           type="button"
           onClick={() => onExport("pdf")}
           disabled={disabled}
-          className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-2xl px-4 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50"
+          style={{
+            backgroundColor: "var(--text-primary)",
+            color: "var(--text-inverse)",
+            border: "1px solid var(--border-color)",
+          }}
         >
           Export PDF
         </button>
@@ -14,12 +19,17 @@ function ExportButtons({ onExport, disabled }) {
           type="button"
           onClick={() => onExport("excel")}
           disabled={disabled}
-          className="rounded-2xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-2xl px-4 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50"
+          style={{
+            backgroundColor: "var(--color-primary)",
+            color: "var(--text-inverse)",
+            border: "1px solid var(--color-primary-dark)",
+          }}
         >
           Export Excel
         </button>
       </div>
-      <p className="text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
         Export will use the selected report type and the current date range.
       </p>
     </div>

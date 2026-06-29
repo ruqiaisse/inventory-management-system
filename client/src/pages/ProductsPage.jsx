@@ -20,6 +20,7 @@ import {
   updateProduct,
   deleteProduct,
   findProductByBarcode,
+  getProductById,
 } from "../services/productService";
 
 import {
@@ -225,7 +226,7 @@ const ProductsPage = () => {
 
       applyFilters();
 
-      showToast("Product deleted");
+      showToast("Product deleted", "error");
     } catch (err) {
       showToast(
         err.response?.data?.message || "Delete failed",
@@ -254,8 +255,10 @@ const ProductsPage = () => {
     }
 
     let parsedValue = code;
+    let scannedId = null;
     try {
       const parsed = JSON.parse(code);
+      scannedId = parsed.id;
       parsedValue = parsed.sku || parsed.id || parsed.name || code;
     } catch {
       parsedValue = code;
@@ -269,10 +272,27 @@ const ProductsPage = () => {
     }
 
     try {
-      const result = await findProductByBarcode(parsedValue);
+      let product = null;
+      
+      // If we have a product ID from QR code, search by ID first
+      if (scannedId) {
+        try {
+          product = await getProductById(scannedId);
+        } catch {
+          // Fall back to barcode search if ID lookup fails
+          const result = await findProductByBarcode(parsedValue);
+          if (result.found) {
+            product = result.product;
+          }
+        }
+      } else {
+        const result = await findProductByBarcode(parsedValue);
+        if (result.found) {
+          product = result.product;
+        }
+      }
 
-      if (result.found) {
-        const product = result.product;
+      if (product) {
         setSearch(product.name || product.sku);
         setHighlightedProductId(product._id);
         showToast(`Found: ${product.name}`);
@@ -352,7 +372,7 @@ const ProductsPage = () => {
                 <button
                   type="button"
                   onClick={handleAdd}
-                  className="inline-flex items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="inline-flex items-center justify-center rounded-md theme-btn-primary"
                   title="Create New Product"
                 >
                   <Plus size={16} className="mr-2" />
@@ -363,7 +383,7 @@ const ProductsPage = () => {
                 type="button"
                 onClick={() => handleExport("pdf")}
                 disabled={exporting || !can("reports.export")}
-                className="inline-flex items-center justify-center rounded-md bg-rose-500 px-3 py-2 text-sm font-medium text-white hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center rounded-md theme-btn-danger"
                 title="Export products as PDF"
               >
                 <FileText size={16} className="mr-2" />
@@ -373,7 +393,7 @@ const ProductsPage = () => {
                 type="button"
                 onClick={() => handleExport("excel")}
                 disabled={exporting || !can("reports.export")}
-                className="inline-flex items-center justify-center rounded-md bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center rounded-md theme-btn-success"
                 title="Export products as Excel"
               >
                 <FileSpreadsheet size={16} className="mr-2" />
@@ -390,7 +410,7 @@ const ProductsPage = () => {
 
         {/* ERROR */}
         {error && (
-          <p className="mt-6 text-red-500">{error}</p>
+          <p className="mt-6 theme-text-danger">{error}</p>
         )}
 
         {!loading && !error && (
@@ -409,31 +429,26 @@ const ProductsPage = () => {
             </div>
 
             {/* SEARCH & FILTERS */}
-            <div className="mt-6 bg-white dark:bg-slate-800 rounded-lg shadow p-4 flex flex-wrap gap-4 items-center">
+            <div className="mt-6 theme-card p-4 flex flex-wrap gap-4 items-center">
               <input
                 type="text"
                 placeholder="Search products..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 min-w-[200px] px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 min-w-[200px] theme-input"
               />
               <button
                 type="button"
-                onClick={() => {
-                  setScannerMode("search");
-                  setShowScanner(true);
-                }}
-                className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
-                title="Scan to find a product"
+                onClick={() => {setShowScanner(true); setScannerMode("search");}}
+                className="theme-btn-primary"
               >
-                <Barcode size={16} className="mr-2" />
-                Scan
+                Scan Barcode
               </button>
 
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="theme-input"
               >
                 <option value="">All Categories</option>
                 {categories.map((cat) => (
@@ -446,7 +461,7 @@ const ProductsPage = () => {
               <select
                 value={supplierFilter}
                 onChange={(e) => setSupplierFilter(e.target.value)}
-                className="px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="theme-input"
               >
                 <option value="">All Suppliers</option>
                 {suppliers.map((sup) => (
@@ -460,14 +475,14 @@ const ProductsPage = () => {
             {/* EMPTY STATE */}
             {products.length === 0 && (
               <div className="mt-10 text-center">
-                <p className="mb-4 text-gray-500">
+                <p className="mb-4 theme-text-secondary">
                   No products found
                 </p>
 
                 {can("products.create") && (
                   <button
                     onClick={handleAdd}
-                    className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                    className="inline-flex items-center justify-center rounded-md theme-btn-primary"
                     title="Create New Product"
                   >
                     <Plus size={16} className="mr-2" />
@@ -479,11 +494,11 @@ const ProductsPage = () => {
 
             {/* TABLE */}
             {products.length > 0 && (
-              <div className="mt-6 overflow-x-auto bg-white dark:bg-slate-800 rounded-lg shadow">
-                <table className="w-full">
-                  <thead className="bg-gray-100 text-gray-900 dark:bg-slate-900 dark:text-slate-100">
+              <div className="mt-6 overflow-x-auto theme-card">
+                <table className="theme-table">
+                  <thead className="theme-table-header">
                     <tr>
-                              <th className="p-3 text-left">Image</th>
+                      <th className="p-3 text-left">Image</th>
                       <th className="p-3 text-left">SKU</th>
                       <th className="p-3 text-left">Barcode</th>
                       <th className="p-3 text-left">Name</th>
@@ -507,34 +522,35 @@ const ProductsPage = () => {
                         <tr
                           id={`product-${product._id}`}
                           key={product._id}
-                          className={`border-b hover:bg-gray-50 text-slate-900 dark:border-slate-700 dark:hover:bg-slate-900 dark:text-slate-100 ${highlightedProductId === product._id ? "bg-amber-100 dark:bg-amber-500/20" : ""}`}
+                          className={`theme-table-row ${highlightedProductId === product._id ? "highlighted-row" : ""}`}
                         >
                           <td className="p-3">
                             {product.image ? (
                               <button
                                 type="button"
                                 onClick={() => window.open(product.image, "_blank")}
-                                className="inline-flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm"
+                                className="theme-icon-btn theme-icon-btn-secondary"
+                                style={{ width: "2.5rem", height: "2.5rem" }}
                               >
                                 <img
                                   src={product.image}
                                   alt={product.name}
-                                  className="h-full w-full object-cover"
+                                  className="h-full w-full object-cover rounded-full"
                                 />
                               </button>
                             ) : (
-                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-xs text-slate-500">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-full theme-panel-muted theme-text-secondary text-xs">
                                 —
                               </div>
                             )}
                           </td>
-                          <td className="p-3 font-mono text-sm">
+                          <td className="p-3 font-mono text-sm theme-text-primary">
                             {product.sku}
                           </td>
-                          <td className="p-3 font-mono text-sm">
+                          <td className="p-3 font-mono text-sm theme-text-primary">
                             {product.barcode || "—"}
                           </td>
-                          <td className="p-3 font-medium">
+                          <td className="p-3 font-medium theme-text-primary">
                             {product.name}
                           </td>
                           <td className="p-3">
@@ -542,23 +558,23 @@ const ProductsPage = () => {
                               {product.category?.name}
                             </Badge>
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 theme-text-secondary">
                             {product.supplier?.name}
                           </td>
                           <td className="p-3">
                             <span
                               className={
                                 product.stock === 0
-                                  ? "text-red-600 font-medium"
+                                  ? "theme-text-danger font-medium"
                                   : product.stock <= product.minStock
-                                  ? "text-amber-600 font-medium"
-                                  : ""
+                                  ? "theme-text-warning font-medium"
+                                  : "theme-text-primary"
                               }
                             >
                               {product.stock}
                             </span>
                           </td>
-                          <td className="p-3">
+                          <td className="p-3 theme-text-primary">
                             ${product.price?.toFixed(2)}
                           </td>
                           <td className="p-3">
@@ -567,36 +583,39 @@ const ProductsPage = () => {
                             </Badge>
                           </td>
                           <td className="p-3 flex gap-2 items-center">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setQrProduct(product);
-                                setShowQRModal(true);
-                              }}
-                              className="inline-flex items-center justify-center rounded-md bg-slate-200 text-slate-900 p-2 hover:bg-slate-300 transition-colors"
-                              title="View QR Code"
-                            >
-                              <QrCode size={18} />
-                            </button>
                             {can("products.update") ? (
                               <button
                                 onClick={() => handleEdit(product)}
-                                className="inline-flex items-center justify-center rounded-md bg-blue-500 text-white p-2 hover:bg-blue-600 transition-colors"
+                                className="theme-icon-btn theme-icon-btn-primary"
                                 title="Edit Product"
+                                style={{ width: "2.5rem", height: "2.5rem" }}
                               >
                                 <Edit2 size={18} />
                               </button>
                             ) : (
-                              <span className="text-slate-500 text-xs">No edit</span>
+                              <span className="theme-text-secondary text-xs">No edit</span>
                             )}
+
+                            <button
+                              onClick={() => {
+                                setQrProduct(product);
+                                setShowQRModal(true);
+                              }}
+                              className="theme-icon-btn theme-icon-btn-secondary"
+                              title="View QR Code"
+                              style={{ width: "2.5rem", height: "2.5rem" }}
+                            >
+                              <QrCode size={18} />
+                            </button>
 
                             {can("products.delete") ? (
                               <button
                                 onClick={() =>
                                   handleDelete(product._id)
                                 }
-                                className="inline-flex items-center justify-center rounded-md bg-red-500 text-white p-2 hover:bg-red-600 transition-colors"
+                                className="theme-icon-btn theme-btn-danger"
                                 title="Delete Product"
+                                style={{ width: "2.5rem", height: "2.5rem" }}
                               >
                                 <Trash2 size={18} />
                               </button>
@@ -625,7 +644,7 @@ const ProductsPage = () => {
             <div className="overflow-y-auto space-y-4 pr-2 flex-1">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 theme-text-primary">
                     Product Name *
                   </label>
 
@@ -635,13 +654,13 @@ const ProductsPage = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full theme-input"
                     placeholder="Product name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 theme-text-primary">
                     SKU *
                   </label>
 
@@ -652,27 +671,16 @@ const ProductsPage = () => {
                       value={formData.sku}
                       onChange={handleChange}
                       required
-                      className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full theme-input"
                       placeholder="SKU-001"
                     />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setScannerMode("fill-sku");
-                        setShowScanner(true);
-                      }}
-                      className="inline-flex items-center justify-center rounded-md bg-slate-100 px-3 text-sm text-slate-900 hover:bg-slate-200"
-                      title="Scan SKU"
-                    >
-                      <Barcode size={16} className="mr-2" />
-                      Scan
-                    </button>
+                    
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 theme-text-primary">
                   Description
                 </label>
 
@@ -680,7 +688,7 @@ const ProductsPage = () => {
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full theme-input"
                   placeholder="Product description"
                   rows="2"
                 />
@@ -688,7 +696,7 @@ const ProductsPage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 theme-text-primary">
                     Category *
                   </label>
 
@@ -697,7 +705,7 @@ const ProductsPage = () => {
                     value={formData.category}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full theme-input"
                   >
                     <option value="">Select Category</option>
                     {categories.map((cat) => (
@@ -709,7 +717,7 @@ const ProductsPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 theme-text-primary">
                     Supplier *
                   </label>
 
@@ -718,7 +726,7 @@ const ProductsPage = () => {
                     value={formData.supplier}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full theme-input"
                   >
                     <option value="">Select Supplier</option>
                     {suppliers.map((sup) => (
@@ -732,7 +740,7 @@ const ProductsPage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 theme-text-primary">
                     Price *
                   </label>
 
@@ -744,13 +752,13 @@ const ProductsPage = () => {
                     required
                     step="0.01"
                     min="0"
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full theme-input"
                     placeholder="0.00"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 theme-text-primary">
                     Stock Quantity
                   </label>
 
@@ -760,7 +768,7 @@ const ProductsPage = () => {
                     value={formData.stock}
                     onChange={handleChange}
                     min="0"
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full theme-input"
                     placeholder="0"
                   />
                 </div>
@@ -768,7 +776,7 @@ const ProductsPage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 theme-text-primary">
                     Min Stock Level
                   </label>
 
@@ -778,13 +786,13 @@ const ProductsPage = () => {
                     value={formData.minStock}
                     onChange={handleChange}
                     min="0"
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full theme-input"
                     placeholder="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 theme-text-primary">
                     Unit
                   </label>
 
@@ -792,7 +800,7 @@ const ProductsPage = () => {
                     name="unit"
                     value={formData.unit}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border rounded bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full theme-input"
                   >
                     <option value="pcs">pcs</option>
                     <option value="kg">kg</option>
@@ -804,7 +812,7 @@ const ProductsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 theme-text-primary">
                   Barcode
                 </label>
 
@@ -814,7 +822,7 @@ const ProductsPage = () => {
                     name="barcode"
                     value={formData.barcode}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full theme-input"
                     placeholder="Barcode"
                   />
                   <button
@@ -825,7 +833,7 @@ const ProductsPage = () => {
                         barcode: generateBarcode(),
                       }))
                     }
-                    className="inline-flex items-center justify-center rounded-md bg-slate-100 px-3 text-sm text-slate-900 hover:bg-slate-200"
+                    className="inline-flex items-center justify-center rounded-md theme-btn-secondary"
                     title="Generate barcode"
                   >
                     <Barcode size={16} className="mr-2" />
@@ -850,14 +858,14 @@ const ProductsPage = () => {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 border rounded hover:bg-gray-100"
+                className="theme-btn-secondary"
               >
                 Cancel
               </button>
 
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="theme-btn-primary"
               >
                 {selectedProduct ? "Update" : "Create"}
               </button>

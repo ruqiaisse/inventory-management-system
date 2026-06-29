@@ -164,11 +164,11 @@ const SuppliersPage = () => {
               <button
                 type="button"
                 onClick={handleAdd}
-                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="inline-flex items-center justify-center rounded-lg theme-btn-primary text-sm px-4 py-2"
                 title="Add Supplier"
               >
                 <Plus size={16} className="mr-2" />
-                Add Supplier
+                Add
               </button>
             ) : null
           }
@@ -176,25 +176,28 @@ const SuppliersPage = () => {
 
         {/* LOADING */}
         {loading && (
-          <p className="mt-6">Loading suppliers...</p>
+          <p className="mt-6 theme-text-secondary">Loading suppliers...</p>
         )}
 
         {/* ERROR */}
         {error && (
-          <p className="mt-6 text-red-500">{error}</p>
+          <p
+            className="mt-6"
+            style={{ color: "var(--color-danger)" }}
+          >
+            {error}
+          </p>
         )}
 
         {/* EMPTY STATE */}
         {!loading && suppliers.length === 0 && (
           <div className="mt-10 text-center">
-            <p className="mb-4 text-gray-500">
-              No suppliers found
-            </p>
+            <p className="mb-4 theme-text-secondary">No suppliers found</p>
 
             {can("suppliers.create") && (
               <button
                 onClick={handleAdd}
-                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                className="inline-flex items-center justify-center rounded-lg theme-btn-primary"
                 title="Add Supplier"
               >
                 <Plus size={16} className="mr-2" />
@@ -205,98 +208,98 @@ const SuppliersPage = () => {
         )}
 
         {/* TABLE */}
-       {!loading && suppliers.length > 0 && (
-  <div className="mt-6 overflow-x-auto bg-white dark:bg-slate-800 rounded-lg shadow">
-    <table className="w-full">
-      <thead className="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
-        <tr>
-          <th className="p-3 text-left">#</th>
-          <th className="p-3 text-left">Name</th>
-          <th className="p-3 text-left">Email</th>
-          <th className="p-3 text-left">Phone</th>
-          <th className="p-3 text-left">Address</th>
-          <th className="p-3 text-left">Status</th>
-          <th className="p-3 text-left">Actions</th>
-        </tr>
-      </thead>
+        {!loading && suppliers.length > 0 && (
+          <div className="mt-6 overflow-x-auto rounded-lg shadow theme-card">
+            <table className="theme-table w-full">
+              <thead className="theme-table-header">
+                <tr>
+                  <th className="p-3 text-left">#</th>
+                  <th className="p-3 text-left">Name</th>
+                  <th className="p-3 text-left">Email</th>
+                  <th className="p-3 text-left">Phone</th>
+                  <th className="p-3 text-left">Address</th>
+                  <th className="p-3 text-left">Status</th>
+                  <th className="p-3 text-left">Actions</th>
+                </tr>
+              </thead>
 
-      <tbody>
-        {suppliers.map((supplier, index) => (
-          <tr
-            key={supplier._id}
-            className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100"
-          >
-            <td className="p-3">{index + 1}</td>
+              <tbody>
+                {suppliers.map((supplier, index) => (
+                  <tr key={supplier._id} className="theme-table-row">
+                    <td className="p-3">{index + 1}</td>
 
-            <td className="p-3 font-medium">
-              {supplier.name}
-            </td>
+                    <td className="p-3 font-medium theme-text-primary">
+                      {supplier.name}
+                    </td>
 
-            <td className="p-3 text-slate-600 dark:text-slate-300">
-              {supplier.email}
-            </td>
+                    <td className="p-3" style={{ color: "var(--text-secondary)" }}>
+                      {supplier.email}
+                    </td>
 
-            <td className="p-3 text-slate-600 dark:text-slate-300">
-              {supplier.phone}
-            </td>
+                    <td className="p-3" style={{ color: "var(--text-secondary)" }}>
+                      {supplier.phone}
+                    </td>
 
-            <td className="p-3 text-slate-600 dark:text-slate-300">
-              {supplier.address}
-            </td>
+                    <td className="p-3" style={{ color: "var(--text-secondary)" }}>
+                      {supplier.address}
+                    </td>
 
-            <td className="p-3">
-              {supplier.isActive ? (
-                <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
-                  Active
-                </span>
-              ) : (
-                <span className="px-2 py-1 text-xs rounded bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                  Inactive
-                </span>
-              )}
-            </td>
+                    <td className="p-3">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          supplier.isActive
+                            ? "theme-badge-success"
+                            : "theme-badge-muted"
+                        }`}
+                      >
+                        {supplier.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
 
-            <td className="p-3 flex gap-2">
-              {can("suppliers.update") && (
-                <button
-                  type="button"
-                  onClick={() => handleEdit(supplier)}
-                  className="inline-flex items-center justify-center rounded-md bg-blue-500 text-white p-2 hover:bg-blue-600 transition-colors"
-                  title="Edit Supplier"
-                >
-                  <Edit2 size={16} />
-                </button>
-              )}
+                    <td className="p-3 flex gap-2">
+                      {can("suppliers.update") && (
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(supplier)}
+                          className="theme-icon-btn theme-btn-primary"
+                          style={{ width: "2.5rem", height: "2.5rem" }}
+                          title="Edit Supplier"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                      )}
 
-              {can("suppliers.delete") && (
-                <button
-                  type="button"
-                  onClick={() => handleDelete(supplier._id)}
-                  className="inline-flex items-center justify-center rounded-md bg-red-500 text-white p-2 hover:bg-red-600 transition-colors"
-                  title="Delete Supplier"
-                >
-                  <Trash2 size={16} />
-                </button>
-              )}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)}
+                      {can("suppliers.delete") && (
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(supplier._id)}
+                          className="theme-icon-btn theme-btn-danger"
+                          style={{ width: "2.5rem", height: "2.5rem" }}
+                          title="Delete Supplier"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* MODAL */}
         <Modal
           isOpen={isModalOpen}
-          title={
-            selectedSupplier ? "Edit Supplier" : "Add Supplier"
-          }
+          title={selectedSupplier ? "Edit Supplier" : "Add Supplier"}
           onClose={() => setIsModalOpen(false)}
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--text-primary)" }}
+              >
                 Name *
               </label>
 
@@ -306,13 +309,16 @@ const SuppliersPage = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full theme-input"
                 placeholder="Supplier name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--text-primary)" }}
+              >
                 Email
               </label>
 
@@ -321,13 +327,16 @@ const SuppliersPage = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full theme-input"
                 placeholder="Email address"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--text-primary)" }}
+              >
                 Phone
               </label>
 
@@ -336,13 +345,16 @@ const SuppliersPage = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full theme-input"
                 placeholder="Phone number"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--text-primary)" }}
+              >
                 Address
               </label>
 
@@ -350,7 +362,7 @@ const SuppliersPage = () => {
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full theme-input"
                 placeholder="Address"
                 rows="3"
               />
@@ -360,26 +372,23 @@ const SuppliersPage = () => {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 border rounded hover:bg-gray-100"
+                className="theme-btn-secondary"
               >
                 Cancel
               </button>
 
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
+              <button type="submit" className="theme-btn-primary">
                 {selectedSupplier ? "Update" : "Create"}
               </button>
             </div>
           </form>
         </Modal>
 
-         {/* TOAST */}
+        {/* TOAST */}
         <Toast
           message={toast.message}
           type={toast.type}
-          isVisible={toast.visible}
+          visible={toast.visible}
           onClose={() =>
             setToast((prev) => ({
               ...prev,

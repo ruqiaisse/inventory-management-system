@@ -119,7 +119,7 @@ const deleteCategory = async (req, res) => {
     const productCount = await Product.countDocuments({ category: category._id });
     if (productCount > 0) {
       return res.status(400).json({
-        message: `Cannot delete category. ${productCount} product(s) are using this category. Remove or reassign those products first.`,
+        message: "Cannot delete category while products reference it. Remove or reassign those products first.",
       });
     }
 

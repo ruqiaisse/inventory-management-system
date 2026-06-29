@@ -17,6 +17,16 @@ export const registerUser = async (data) => {
   return response.data;
 };
 
+export const forgotPassword = async (data) => {
+  const response = await apiClient.post(`${AUTH_PATH}/forgot-password`, data);
+  return response.data;
+};
+
+export const resetPassword = async (token, data) => {
+  const response = await apiClient.put(`${AUTH_PATH}/reset-password/${token}`, data);
+  return response.data;
+};
+
 export const logoutUser = () => {
   clearAuthData();
 };

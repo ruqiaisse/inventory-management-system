@@ -1,14 +1,51 @@
-// StatCard does not require default React import
 
-function StatCard({ title, value, color = "#2563eb", trend }) {
+
+function StatCard({ title, value, color = "var(--color-primary)", trend, icon: Icon, badge }) {
   return (
-    <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-sm">
-      <div className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">{title}</div>
-      <h2 className="text-3xl font-bold" style={{ color }}>
-        {value}
-      </h2>
-      {trend && <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{trend}</p>}
-      <span className="block mt-4 h-1 rounded-full" style={{ backgroundColor: color }} />
+    <div
+      className="rounded-lg border shadow-sm transition hover:shadow-md hover:-translate-y-0.5"
+      style={{
+        backgroundColor: "var(--card-bg)",
+        borderColor: "var(--card-border)",
+      }}
+    >
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex-1">
+            <div className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--text-secondary)" }}>
+              {title}
+            </div>
+            <div className="text-2xl font-bold" style={{ color }}>
+              {value}
+            </div>
+          </div>
+          {Icon && (
+            <div
+              className="flex h-12 w-12 items-center justify-center rounded-lg flex-shrink-0 ml-3"
+              style={{
+                backgroundColor: "var(--bg-tertiary)",
+                color,
+              }}
+            >
+              <Icon size={24} />
+            </div>
+          )}
+        </div>
+
+        {trend && (
+          <p className="text-xs mb-3" style={{ color: "var(--text-secondary)" }}>
+            {trend}
+          </p>
+        )}
+
+        {badge && (
+          <div className="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" style={{ backgroundColor: color, color: "white" }}>
+            {badge}
+          </div>
+        )}
+
+        <div className="mt-4 h-1 rounded-full" style={{ backgroundColor: color }} />
+      </div>
     </div>
   );
 }

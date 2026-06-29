@@ -17,9 +17,14 @@ function POForm({ selectedPO, onSubmit, onClose, products, suppliers }) {
 
   useEffect(() => {
     if (selectedPO) {
+      const normalizedItems = selectedPO.items.map((item) => ({
+        ...item,
+        product: typeof item.product === "object" ? item.product._id : item.product,
+      }));
+
       setFormData({
         supplier: selectedPO.supplier?._id || "",
-        items: selectedPO.items || [{ product: "", quantity: 1, unitPrice: 0 }],
+        items: normalizedItems.length > 0 ? normalizedItems : [{ product: "", quantity: 1, unitPrice: 0 }],
         notes: selectedPO.notes || "",
       });
     }
@@ -115,18 +120,39 @@ function POForm({ selectedPO, onSubmit, onClose, products, suppliers }) {
 
   const grandTotal = calculateGrandTotal();
 
+  const labelStyle = {
+    color: "var(--text-secondary)",
+  };
+
+  const inputStyle = {
+    backgroundColor: "var(--input-bg)",
+    border: "1px solid var(--input-border)",
+    color: "var(--input-text)",
+  };
+
+  const buttonPrimaryStyle = {
+    backgroundColor: "var(--button-primary-bg)",
+    color: "var(--button-primary-text)",
+  };
+
+  const buttonSecondaryStyle = {
+    backgroundColor: "var(--button-secondary-bg)",
+    color: "var(--button-secondary-text)",
+    border: "1px solid var(--border-color)",
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Supplier Selection */}
       <div>
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+        <label className="block text-sm font-medium mb-2" style={labelStyle}>
           Supplier *
         </label>
         <select
           value={formData.supplier}
           onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
           required
-          className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 rounded-lg focus:outline-none theme-input"
+          style={inputStyle}
         >
           <option value="">Select Supplier</option>
           {suppliers.map((supplier) => (
@@ -137,22 +163,40 @@ function POForm({ selectedPO, onSubmit, onClose, products, suppliers }) {
         </select>
       </div>
 
-      {/* Items Section */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+          <label className="block text-sm font-medium" style={labelStyle}>
             Items *
           </label>
           <button
             type="button"
             onClick={handleAddItem}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition"
+            className="px-3 py-1 rounded text-sm font-medium transition"
+            style={buttonPrimaryStyle}
           >
             + Add Item
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div
+          className="grid grid-cols-12 gap-3 mb-2 px-3 py-2 font-semibold text-sm rounded-t-lg"
+          style={{
+            backgroundColor: "var(--panel-bg)",
+            color: "var(--text-secondary)",
+            border: "1px solid var(--border-color)",
+          }}
+        >
+          <div className="col-span-5">Product</div>
+          <div className="col-span-2 text-center">Qty</div>
+          <div className="col-span-2 text-center">Unit Price</div>
+          <div className="col-span-2 text-center">Total</div>
+          <div className="col-span-1"></div>
+        </div>
+
+        <div
+          className="space-y-2 p-3 rounded-b-lg"
+          style={{ backgroundColor: "var(--panel-muted-bg)", border: "1px solid var(--border-color)" }}
+        >
           {formData.items.map((item, index) => (
             <POItemRow
               key={index}
@@ -162,35 +206,41 @@ function POForm({ selectedPO, onSubmit, onClose, products, suppliers }) {
               onChange={handleItemChange}
               onRemove={handleRemoveItem}
               readOnly={false}
+              showLabels={false}
             />
           ))}
         </div>
 
-        {/* Scan Button */}
         <button
           type="button"
           onClick={() => setShowScanner(true)}
-          className="mt-4 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg text-sm font-medium transition"
+          className="mt-4 px-4 py-2 rounded-lg text-sm font-medium transition"
+          style={buttonPrimaryStyle}
         >
           📱 Scan Product
         </button>
       </div>
 
-      {/* Grand Total */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+      <div
+        className="p-4 rounded-lg border-2"
+        style={{
+          backgroundColor: "var(--panel-bg)",
+          borderColor: "var(--border-color)",
+          color: "var(--text-primary)",
+        }}
+      >
         <div className="flex justify-between items-center">
-          <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          <span className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
             Grand Total:
           </span>
-          <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+          <span className="text-2xl font-bold" style={{ color: "var(--color-primary)" }}>
             ${grandTotal.toFixed(2)}
           </span>
         </div>
       </div>
 
-      {/* Notes */}
       <div>
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+        <label className="block text-sm font-medium mb-2" style={labelStyle}>
           Notes (Optional)
         </label>
         <textarea
@@ -198,66 +248,65 @@ function POForm({ selectedPO, onSubmit, onClose, products, suppliers }) {
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
           placeholder="Enter any special instructions or notes..."
           rows="3"
-          className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 rounded-lg focus:outline-none theme-input"
+          style={inputStyle}
         />
       </div>
 
-      {/* Error/Success Messages */}
       {error && (
-        <div className="p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-lg text-rose-700 dark:text-rose-300 text-sm">
+        <div
+          className="p-4 rounded-lg text-sm"
+          style={{
+            backgroundColor: "var(--color-danger-light)",
+            border: "1px solid var(--color-danger)",
+            color: "var(--color-danger-dark)",
+          }}
+        >
           {error}
         </div>
       )}
 
       {success && (
-        <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg text-emerald-700 dark:text-emerald-300 text-sm">
+        <div
+          className="p-4 rounded-lg text-sm"
+          style={{
+            backgroundColor: "var(--color-success-light)",
+            border: "1px solid var(--color-success)",
+            color: "var(--color-success-dark)",
+          }}
+        >
           {success}
         </div>
       )}
 
-      {/* Buttons */}
-      <div className="flex gap-3 justify-end pt-4 border-t border-slate-200 dark:border-slate-700">
+      <div className="flex gap-3 justify-end pt-4" style={{ borderTop: "1px solid var(--border-color)" }}>
         <button
           type="button"
           onClick={onClose}
-          className="px-6 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 font-medium transition"
+          className="px-6 py-2 rounded-lg font-medium transition"
+          style={buttonSecondaryStyle}
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg font-medium transition"
+          className="px-6 py-2 rounded-lg font-medium transition"
+          style={buttonPrimaryStyle}
         >
           {loading ? "Saving..." : selectedPO ? "Update PO" : "Save as Draft"}
         </button>
       </div>
 
-      {/* Scanner */}
       {showScanner && (
-        <BarcodeScanner
-          mode="barcode"
-          onScan={handleScan}
-          onClose={() => setShowScanner(false)}
-        />
+        <BarcodeScanner mode="barcode" onScan={handleScan} onClose={() => setShowScanner(false)} />
       )}
 
-      {/* Toast */}
       {error && (
-        <Toast
-          message={error}
-          type="error"
-          visible={Boolean(error)}
-          onClose={() => setError("")}
-        />
+        <Toast message={error} type="error" visible={Boolean(error)} onClose={() => setError("")} />
       )}
       {success && (
-        <Toast
-          message={success}
-          type="success"
-          visible={Boolean(success)}
-          onClose={() => setSuccess("")}
-        />
+        <Toast message={success} type="success" visible={Boolean(success)} onClose={() => setSuccess("")} />
       )}
     </form>
   );

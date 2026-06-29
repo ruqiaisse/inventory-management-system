@@ -11,6 +11,10 @@ const {
   getSuppliersExcel,
   getActivityPdf,
   getActivityExcel,
+  getSalesPdf,
+  getSalesExcel,
+  getCustomersPdf,
+  getCustomersExcel,
 } = require("../controllers/reportController");
 
 const router = express.Router();
@@ -34,5 +38,13 @@ router.get("/suppliers/excel", protect, getSuppliersExcel);
 // Activity Log Report
 router.get("/activity/pdf", protect, getActivityPdf);
 router.get("/activity/excel", protect, getActivityExcel);
+
+// Sales Report
+router.get("/sales/pdf", protect, getSalesPdf);
+router.get("/sales/excel", protect, getSalesExcel);
+
+// Customers Report
+router.get("/customers/pdf", protect, getCustomersPdf);
+router.get("/customers/excel", protect, getCustomersExcel);
 
 module.exports = router;

@@ -6,8 +6,8 @@ function Breadcrumb() {
   const parts = location.pathname.split("/").filter(Boolean);
 
   return (
-    <div className="text-xs text-slate-500 dark:text-slate-400">
-      <Link to="/dashboard" className="hover:text-slate-700 dark:hover:text-slate-100">
+    <div className="text-xs" style={{ color: "var(--text-secondary)" }}>
+      <Link to="/" style={{ color: "var(--text-secondary)" }} className="hover:opacity-80">
         Home
       </Link>
       {parts.map((p, idx) => {
@@ -15,8 +15,8 @@ function Breadcrumb() {
         const label = p.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
         return (
           <span key={path} className="inline-flex items-center gap-1">
-            <span className="text-slate-400 dark:text-slate-500">/</span>
-            <Link to={path} className="hover:text-slate-700 dark:hover:text-slate-100">
+            <span style={{ color: "var(--text-tertiary)" }}>/</span>
+            <Link to={path} style={{ color: "var(--text-secondary)" }} className="hover:opacity-80">
               {label}
             </Link>
           </span>

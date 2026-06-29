@@ -6,14 +6,20 @@ import {
   Legend, 
   ResponsiveContainer, 
 } from "recharts"; 
- 
-const COLORS = [ 
-  "#22c55e",  // green - in stock
-  "#f59e0b",  // amber - low stock
-  "#ef4444",  // red - out of stock
-]; 
 
 function ProductStatusChart({ data = [] }) { 
+  // Get colors from CSS variables
+  const getChartColors = () => {
+    const root = document.documentElement;
+    return [
+      getComputedStyle(root).getPropertyValue('--status-in-stock').trim() || "#22c55e",
+      getComputedStyle(root).getPropertyValue('--status-low-stock').trim() || "#f59e0b",
+      getComputedStyle(root).getPropertyValue('--status-out-stock').trim() || "#ef4444",
+    ];
+  };
+
+  const COLORS = getChartColors();
+
   // Format data for display
   const chartData = data.length > 0 ? data : [
     { status: "In Stock", count: 0 },
@@ -24,35 +30,53 @@ function ProductStatusChart({ data = [] }) {
   // Calculate total
   const total = chartData.reduce((sum, item) => sum + item.count, 0);
 
+  const textPrimary = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
+  const textSecondary = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim();
+  const cardBg = getComputedStyle(document.documentElement).getPropertyValue('--card-bg').trim();
+  const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
+
   return ( 
-    <div className="rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 backdrop-blur dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/20 p-6 transition-colors duration-300">
+    <div
+      className="rounded-xl p-6 transition-colors duration-300"
+      style={{
+        backgroundColor: `var(--card-bg)`,
+        border: `1px solid var(--border-color)`,
+        boxShadow: `var(--card-shadow)`,
+      }}
+    >
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
+          <h2 className="text-lg font-semibold mb-1" style={{ color: `var(--text-primary)` }}>
             Product Status
           </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm" style={{ color: `var(--text-secondary)` }}>
             Overview of inventory status
           </p>
         </div>
-        <div className="rounded-2xl bg-slate-100 px-4 py-2 dark:bg-slate-800">
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-            Total: <span className="font-semibold text-slate-900 dark:text-slate-100">{total}</span>
+        <div
+          className="rounded-lg px-4 py-2"
+          style={{
+            backgroundColor: `var(--bg-tertiary)`,
+            color: `var(--text-secondary)`,
+          }}
+        >
+          <p className="text-sm font-medium">
+            Total: <span className="font-semibold" style={{ color: `var(--text-primary)` }}>{total}</span>
           </p>
         </div>
       </div>
 
       {/* Chart Container */}
-      <div className="h-80 mb-6">
+      <div style={{ width: "100%", height: "300px", minHeight: "300px", minWidth: 0, marginBottom: "1.5rem" }}>
         {total > 0 ? (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
                 data={chartData}
                 dataKey="count"
                 nameKey="status"
-                outerRadius={100}
+                outerRadius={80}
                 label={({ status, count }) => `${status}: ${count}`}
                 labelLine={false}
               >
@@ -65,18 +89,19 @@ function ProductStatusChart({ data = [] }) {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "rgba(15, 23, 42, 0.95)",
-                  border: "1px solid rgba(148, 163, 184, 0.2)",
-                  borderRadius: "12px",
-                  padding: "12px",
+                  backgroundColor: `var(--card-bg)`,
+                  border: `1px solid var(--border-color)`,
+                  borderRadius: "8px",
+                  padding: "10px",
+                  color: `var(--text-primary)`,
                 }}
-                labelStyle={{ color: "#e2e8f0" }}
+                labelStyle={{ color: `var(--text-secondary)` }}
                 formatter={(value) => [`${value} products`, "Count"]}
               />
               <Legend
-                wrapperStyle={{ paddingTop: "20px" }}
+                wrapperStyle={{ paddingTop: "15px" }}
                 formatter={(value) => (
-                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                  <span style={{ color: `var(--text-secondary)`, fontSize: "0.875rem" }}>
                     {value}
                   </span>
                 )}
@@ -86,10 +111,10 @@ function ProductStatusChart({ data = [] }) {
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <p className="text-slate-500 dark:text-slate-400 mb-2">
+              <p style={{ color: `var(--text-secondary)`, marginBottom: "0.5rem" }}>
                 📊 No data available
               </p>
-              <p className="text-sm text-slate-400 dark:text-slate-500">
+              <p className="text-sm" style={{ color: `var(--text-secondary)` }}>
                 Add products to see status breakdown
               </p>
             </div>
@@ -99,24 +124,28 @@ function ProductStatusChart({ data = [] }) {
 
       {/* Stats Grid */}
       {total > 0 && (
-        <div className="grid grid-cols-3 gap-3 border-t border-slate-200 dark:border-slate-800 pt-6">
+        <div className="grid grid-cols-3 gap-3 border-t pt-6" style={{ borderColor: `var(--border-color)` }}>
           {chartData.map((item, index) => {
             const percentage = total > 0 ? ((item.count / total) * 100).toFixed(1) : 0;
             const statusLabels = ["In Stock", "Low Stock", "Out of Stock"];
             
             return (
-              <div key={index} className="text-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-800">
+              <div
+                key={index}
+                className="text-center p-3 rounded-lg"
+                style={{ backgroundColor: `var(--bg-secondary)` }}
+              >
                 <div
                   className="w-3 h-3 rounded-full mx-auto mb-2"
                   style={{ backgroundColor: COLORS[index] }}
                 />
-                <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                <p className="text-sm font-medium" style={{ color: `var(--text-primary)` }}>
                   {item.count}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-xs mt-1" style={{ color: `var(--text-secondary)` }}>
                   {statusLabels[index]}
                 </p>
-                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1">
+                <p className="text-xs font-semibold mt-1" style={{ color: `var(--text-secondary)` }}>
                   {percentage}%
                 </p>
               </div>

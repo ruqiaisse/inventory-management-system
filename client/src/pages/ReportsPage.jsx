@@ -11,6 +11,8 @@ const TABS = [
   { id: "categories", label: "Categories", hasDateFilter: false },
   { id: "suppliers", label: "Suppliers", hasDateFilter: false },
   { id: "activity", label: "Activity", hasDateFilter: true },
+  { id: "sales", label: "Sales Report", hasDateFilter: true },
+  { id: "customers", label: "Customer Report", hasDateFilter: true },
 ];
 
 const COLUMNS = {
@@ -51,6 +53,23 @@ const COLUMNS = {
     { key: "user", label: "User" },
     { key: "details", label: "Details" },
   ],
+  sales: [
+    { key: "invoiceNumber", label: "Invoice" },
+    { key: "customer", label: "Customer" },
+    { key: "items", label: "Items" },
+    { key: "totalAmount", label: "Total" },
+    { key: "paymentMethod", label: "Payment" },
+    { key: "status", label: "Status" },
+    { key: "date", label: "Date" },
+  ],
+  customers: [
+    { key: "customerCode", label: "Code" },
+    { key: "name", label: "Name" },
+    { key: "phone", label: "Phone" },
+    { key: "email", label: "Email" },
+    { key: "status", label: "Status" },
+    { key: "date", label: "Date" },
+  ],
 };
 
 function ReportsPage() {
@@ -81,6 +100,12 @@ function ReportsPage() {
       if (to && itemDate > to) return false;
       return true;
     });
+  };
+
+  const normalizeResponseArray = (result) => {
+    if (Array.isArray(result)) return result;
+    if (result?.data) return result.data;
+    return [];
   };
 
   // Fetch report data from existing APIs
@@ -147,18 +172,19 @@ function ReportsPage() {
         const response = await fetch("/api/categories", { headers });
         if (!response.ok) throw new Error("Failed to fetch categories");
         const result = await response.json();
-        const categories = result.data || result || [];
+        const categories = normalizeResponseArray(result);
         
         // Get categories with product count
         const categoriesPromise = categories.map(async (category) => {
           try {
             const productsRes = await fetch(`/api/products?category=${category._id}`, { headers });
             const productsResult = await productsRes.json();
-            const count = (productsResult.data || []).length;
+            const products = normalizeResponseArray(productsResult);
+            const count = products.length;
             return {
               name: category.name,
               description: category.description || "-",
-              count: count,
+              count,
               status: category.isActive ? "Active" : "Inactive",
             };
           } catch (err) {
@@ -177,19 +203,20 @@ function ReportsPage() {
         const response = await fetch("/api/suppliers", { headers });
         if (!response.ok) throw new Error("Failed to fetch suppliers");
         const result = await response.json();
-        const suppliers = result.data || result || [];
+        const suppliers = normalizeResponseArray(result);
         
         // Get suppliers with product count
         const suppliersPromise = suppliers.map(async (supplier) => {
           try {
             const productsRes = await fetch(`/api/products?supplier=${supplier._id}`, { headers });
             const productsResult = await productsRes.json();
-            const count = (productsResult.data || []).length;
+            const products = normalizeResponseArray(productsResult);
+            const count = products.length;
             return {
               name: supplier.name,
               email: supplier.email || "-",
               phone: supplier.phone || "-",
-              count: count,
+              count,
               status: supplier.isActive ? "Active" : "Inactive",
             };
           } catch (err) {
@@ -223,6 +250,41 @@ function ReportsPage() {
           .reverse(); // Newest first
 
         // Filter by date if provided
+        data = filterByDate(data, "createdAt");
+      } else if (activeTab === "sales") {
+        const response = await fetch("/api/sales", { headers });
+        if (!response.ok) throw new Error("Failed to fetch sales");
+        const result = await response.json();
+        const sales = result.sales || result.data || result || [];
+
+        data = sales.map((sale) => ({
+          invoiceNumber: sale.invoiceNumber || "-",
+          customer: sale.customer?.name || sale.customer || "-",
+          items: sale.items?.length || 0,
+          totalAmount: `$${parseFloat(sale.totalAmount || 0).toFixed(2)}`,
+          paymentMethod: sale.paymentMethod || "-",
+          status: sale.status || "-",
+          createdAt: sale.createdAt,
+          date: sale.createdAt ? new Date(sale.createdAt).toLocaleDateString() : "-",
+        }));
+
+        data = filterByDate(data, "createdAt");
+      } else if (activeTab === "customers") {
+        const response = await fetch("/api/customers", { headers });
+        if (!response.ok) throw new Error("Failed to fetch customers");
+        const result = await response.json();
+        const customers = result.customers || result.data || result || [];
+
+        data = customers.map((customer) => ({
+          customerCode: customer.customerCode || "-",
+          name: customer.name || "-",
+          phone: customer.phone || "-",
+          email: customer.email || "-",
+          status: customer.status || "-",
+          createdAt: customer.createdAt,
+          date: customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : "-",
+        }));
+
         data = filterByDate(data, "createdAt");
       }
 
@@ -258,22 +320,22 @@ function ReportsPage() {
   return (
     <div className="space-y-6">
       {/* Header with PageHeader and Export Buttons */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex-1">
           <PageHeader title="Reports" subtitle="View and export reports" />
         </div>
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-wrap gap-3 pt-2">
           <button
             onClick={() => handleExport("pdf")}
             disabled={exporting || !can("reports.export")}
-            className="rounded-2xl bg-rose-500 px-6 py-2 text-sm font-medium text-white hover:bg-rose-600 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            className="theme-btn-danger"
           >
             {exporting ? "Exporting..." : "PDF"}
           </button>
           <button
             onClick={() => handleExport("excel")}
             disabled={exporting || !can("reports.export")}
-            className="rounded-2xl bg-emerald-500 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-600 transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            className="theme-btn-success"
           >
             {exporting ? "Exporting..." : "Excel"}
           </button>
@@ -281,18 +343,21 @@ function ReportsPage() {
       </div>
 
       {/* Tabs and Content Card */}
-      <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+      <div className="theme-card">
         {/* Tab Navigation */}
-        <div className="flex overflow-x-auto border-b border-slate-200 dark:border-slate-700">
+        <div
+          className="flex overflow-x-auto border-b"
+          style={{ borderColor: "var(--border-color)" }}
+        >
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 px-4 py-4 text-sm font-medium transition whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "border-b-2 border-sky-500 text-sky-600 dark:text-sky-400"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-              }`}
+              className="flex-1 px-4 py-4 text-sm font-medium transition whitespace-nowrap"
+              style={{
+                color: activeTab === tab.id ? "var(--color-primary)" : "var(--text-secondary)",
+                borderBottom: activeTab === tab.id ? "2px solid var(--color-primary)" : "none",
+              }}
             >
               {tab.label}
             </button>
@@ -304,32 +369,38 @@ function ReportsPage() {
           {/* Filters */}
           {hasDateFilter && (
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Date Range</h3>
+              <h3 className="text-sm font-semibold theme-text-primary">
+                Date Range
+              </h3>
               <div className="grid gap-4 sm:grid-cols-3">
                 <label className="block">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">From Date</span>
+                  <span className="text-sm font-medium block mb-2 theme-text-primary">
+                    From Date
+                  </span>
                   <input
                     type="date"
                     value={fromDate}
                     onChange={(e) => setFromDate(e.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                    className="theme-input w-full"
                   />
                 </label>
 
                 <label className="block">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">To Date</span>
+                  <span className="text-sm font-medium block mb-2 theme-text-primary">
+                    To Date
+                  </span>
                   <input
                     type="date"
                     value={toDate}
                     onChange={(e) => setToDate(e.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                    className="theme-input w-full"
                   />
                 </label>
 
                 <div className="flex items-end">
                   <button
                     onClick={loadReportData}
-                    className="w-full rounded-2xl bg-sky-500 px-4 py-3 text-sm font-medium text-white hover:bg-sky-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="theme-btn-primary w-full"
                     disabled={loading}
                   >
                     {loading ? "Loading..." : "Apply Filter"}
@@ -340,45 +411,45 @@ function ReportsPage() {
           )}
 
           {!hasDateFilter && (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm theme-text-secondary">
               This report auto-loads and updates when the tab is switched.
             </p>
           )}
 
           {/* Error Message */}
           {error && (
-            <div className="rounded-2xl bg-rose-50 dark:bg-rose-950 p-4 text-sm text-rose-700 dark:text-rose-200">
-              {error}
-            </div>
+            <div className="theme-panel theme-text-danger p-4 text-sm">
+            {error}
+          </div>
           )}
 
           {/* Data Table */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <h3 className="text-sm font-semibold theme-text-primary">
               Data ({reportData.length} records)
             </h3>
 
             {!error && reportData.length === 0 && !loading && (
-              <div className="rounded-2xl bg-slate-50 dark:bg-slate-950 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+              <div className="theme-panel p-8 text-center text-sm theme-text-secondary">
                 No data available. {hasDateFilter && "Try adjusting the date range."}
               </div>
             )}
 
             {loading && (
-              <div className="rounded-2xl bg-slate-50 dark:bg-slate-950 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+              <div className="theme-panel p-8 text-center text-sm theme-text-secondary">
                 Loading data...
               </div>
             )}
 
             {reportData.length > 0 && !loading && (
-              <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700">
+              <div className="overflow-x-auto rounded-lg border theme-border">
                 <table className="w-full text-sm">
-                  <thead className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-700">
-                    <tr>
+                  <thead className="theme-panel-strong">
+                    <tr className="border-b theme-border">
                       {COLUMNS[activeTab].map((col) => (
                         <th
                           key={col.key}
-                          className="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-100"
+                          className="px-4 py-3 text-left font-semibold theme-text-primary"
                         >
                           {col.label}
                         </th>
@@ -389,27 +460,45 @@ function ReportsPage() {
                     {reportData.map((row, idx) => (
                       <tr
                         key={idx}
-                        className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-950/50 transition"
+                        className="border-b theme-border"
                       >
                         {COLUMNS[activeTab].map((col) => {
                           let value = row[col.key];
 
                           // Format status badges
                           if (col.key === "status") {
-                            const statusColors = {
-                              "In Stock": "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200",
-                              "Low Stock": "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-200",
-                              "Out of Stock": "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-200",
-                              Active: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200",
-                              Inactive: "bg-slate-100 text-slate-700 dark:bg-slate-950 dark:text-slate-200",
+                            let badgeStyle = {
+                              backgroundColor: "var(--bg-secondary)",
+                              color: "var(--text-secondary)",
                             };
+
+                            if (value === "In Stock" || value === "Active") {
+                              badgeStyle = {
+                                backgroundColor: "var(--color-success-light)",
+                                color: "var(--color-success-dark)",
+                              };
+                            } else if (value === "Low Stock") {
+                              badgeStyle = {
+                                backgroundColor: "var(--color-warning-light)",
+                                color: "var(--color-warning-dark)",
+                              };
+                            } else if (value === "Out of Stock") {
+                              badgeStyle = {
+                                backgroundColor: "var(--color-danger-light)",
+                                color: "var(--color-danger-dark)",
+                              };
+                            } else if (value === "Inactive") {
+                              badgeStyle = {
+                                backgroundColor: "var(--bg-tertiary)",
+                                color: "var(--text-secondary)",
+                              };
+                            }
 
                             return (
                               <td key={col.key} className="px-4 py-3">
                                 <span
-                                  className={`inline-block px-2 py-1 rounded-lg text-xs font-medium ${
-                                    statusColors[value] || "bg-slate-100 text-slate-700"
-                                  }`}
+                                  className="inline-block px-2.5 py-1 rounded-full text-xs font-medium"
+                                  style={badgeStyle}
                                 >
                                   {value}
                                 </span>
@@ -418,7 +507,11 @@ function ReportsPage() {
                           }
 
                           return (
-                            <td key={col.key} className="px-4 py-3 text-slate-600 dark:text-slate-400">
+                            <td
+                              key={col.key}
+                              className="px-4 py-3"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
                               {value || "-"}
                             </td>
                           );
@@ -432,7 +525,13 @@ function ReportsPage() {
           </div>
 
           {!can("reports.export") && (
-            <div className="rounded-2xl bg-amber-50 dark:bg-amber-950 p-4 text-sm text-amber-800 dark:text-amber-200">
+            <div
+              className="rounded-lg p-4 text-sm"
+              style={{
+                backgroundColor: "var(--color-warning-light)",
+                color: "var(--color-warning-dark)",
+              }}
+            >
               You do not have permission to export reports.
             </div>
           )}

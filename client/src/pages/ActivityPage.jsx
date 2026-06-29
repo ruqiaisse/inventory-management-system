@@ -120,17 +120,15 @@ const ActivityPage = () => {
         {!loading && !error && (
           <>
             {/* MODULE FILTER */}
-            <div className="mt-6 bg-white dark:bg-slate-800 rounded-lg shadow p-4">
+            <div className="mt-6 theme-card p-4">
               <select
                 value={moduleFilter}
                 onChange={(e) => setModuleFilter(e.target.value)}
-                className="px-3 py-2 border rounded bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="theme-input"
               >
                 <option value="">All Modules</option>
                 <option value="products">Products</option>
-                <option value="categories">
-                  Categories
-                </option>
+                <option value="categories">Categories</option>
                 <option value="suppliers">Suppliers</option>
                 <option value="users">Users</option>
                 <option value="stock">Stock</option>
@@ -148,49 +146,40 @@ const ActivityPage = () => {
 
             {/* TABLE */}
             {logs.length > 0 && (
-              <div className="mt-6 overflow-x-auto bg-white dark:bg-slate-800 rounded-lg shadow">
-                <table className="w-full">
-                  <thead className="bg-gray-100 text-gray-900 dark:bg-slate-900 dark:text-slate-100">
+              <div className="mt-6 overflow-x-auto theme-card">
+                <table className="theme-table">
+                  <thead className="theme-table-header">
                     <tr>
                       <th className="p-3 text-left">#</th>
                       <th className="p-3 text-left">Action</th>
                       <th className="p-3 text-left">Module</th>
-                      <th className="p-3 text-left">
-                        Details
-                      </th>
+                      <th className="p-3 text-left">Details</th>
                       <th className="p-3 text-left">User</th>
-                      <th className="p-3 text-left">
-                        Date & Time
-                      </th>
+                      <th className="p-3 text-left">Date & Time</th>
                     </tr>
                   </thead>
 
                   <tbody>
                     {logs.map((log, index) => (
-                      <tr
-                        key={log._id}
-                        className="border-b hover:bg-gray-50 text-slate-900 dark:border-slate-700 dark:hover:bg-slate-900 dark:text-slate-100"
-                      >
+                      <tr key={log._id} className="theme-table-row">
                         <td className="p-3">{index + 1}</td>
-                        <td className="p-3">
+                        <td className="p-3 theme-text-primary">
                           {log.action}
                         </td>
                         <td className="p-3">
                           <Badge
-                            type={getModuleBadgeType(
-                              log.module
-                            )}
+                            type={getModuleBadgeType(log.module)}
                           >
                             {log.module}
                           </Badge>
                         </td>
-                        <td className="p-3">
+                        <td className="p-3 theme-text-secondary">
                           {log.details || "-"}
                         </td>
-                        <td className="p-3">
+                        <td className="p-3 theme-text-primary">
                           {log.user?.name || "System"}
                         </td>
-                        <td className="p-3">
+                        <td className="p-3 theme-text-secondary">
                           {formatDate(log.createdAt)}
                         </td>
                       </tr>

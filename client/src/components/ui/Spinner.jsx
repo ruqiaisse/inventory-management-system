@@ -1,4 +1,4 @@
-// Spinner does not require default React import
+
 
 function Spinner({ size = 36 }) {
   return (

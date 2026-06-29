@@ -1,17 +1,36 @@
 function ReportTable({ products = [], loading }) {
   if (loading) {
-    return <div className="text-sm text-slate-500">Loading preview...</div>;
+    return (
+      <div className="text-sm" style={{ color: "var(--text-secondary)" }}>
+        Loading preview...
+      </div>
+    );
   }
 
   if (!products.length) {
-    return <div className="text-sm text-slate-500">No product preview data available for the selected range.</div>;
+    return (
+      <div className="text-sm" style={{ color: "var(--text-secondary)" }}>
+        No product preview data available for the selected range.
+      </div>
+    );
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-700">
+    <div
+      className="overflow-hidden rounded-3xl"
+      style={{
+        border: "1px solid var(--border-color)",
+        backgroundColor: "var(--card-bg)",
+      }}
+    >
       <div className="overflow-x-auto">
-        <table className="min-w-full text-left text-sm text-slate-600 dark:text-slate-300">
-          <thead className="bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300">
+        <table className="min-w-full text-left text-sm" style={{ color: "var(--text-primary)" }}>
+          <thead
+            style={{
+              backgroundColor: "var(--panel-strong-bg)",
+              color: "var(--text-primary)",
+            }}
+          >
             <tr>
               <th className="px-4 py-3">SKU</th>
               <th className="px-4 py-3">Name</th>
@@ -23,7 +42,7 @@ function ReportTable({ products = [], loading }) {
           </thead>
           <tbody>
             {products.slice(0, 10).map((product) => (
-              <tr key={product._id} className="border-t border-slate-200 dark:border-slate-700">
+              <tr key={product._id} style={{ borderTop: "1px solid var(--border-color)" }}>
                 <td className="px-4 py-3">{product.sku}</td>
                 <td className="px-4 py-3">{product.name}</td>
                 <td className="px-4 py-3">{product.category?.name || "-"}</td>
@@ -35,7 +54,14 @@ function ReportTable({ products = [], loading }) {
           </tbody>
         </table>
       </div>
-      <div className="border-t border-slate-200 bg-slate-50 p-4 text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
+      <div
+        className="p-4 text-xs"
+        style={{
+          borderTop: "1px solid var(--border-color)",
+          backgroundColor: "var(--panel-bg)",
+          color: "var(--text-secondary)",
+        }}
+      >
         Showing up to 10 products from the selected report preview.
       </div>
     </div>

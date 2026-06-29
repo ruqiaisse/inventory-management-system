@@ -188,7 +188,7 @@ function PurchaseOrdersPage() {
             can("purchase-orders.create") && (
               <button
                 onClick={handleCreate}
-                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="inline-flex items-center justify-center rounded-md theme-btn-primary"
                 title="Create Purchase Order"
               >
                 <Plus size={16} className="mr-2" />
@@ -199,17 +199,18 @@ function PurchaseOrdersPage() {
         />
 
         {/* Tabs */}
-        <div className="mt-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="mt-6 border-b" style={{ borderColor: "var(--border-color)" }}>
           <div className="flex gap-2 overflow-x-auto">
             {visibleTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition ${
+                className="px-4 py-3 text-sm font-medium whitespace-nowrap transition"
+                style={
                   activeTab === tab.id
-                    ? "border-b-2 border-blue-600 text-blue-600 dark:text-blue-400"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                }`}
+                    ? { borderBottom: "2px solid var(--color-primary)", color: "var(--color-primary)" }
+                    : { color: "var(--text-secondary)" }
+                }
               >
                 {tab.label}
               </button>
@@ -219,7 +220,7 @@ function PurchaseOrdersPage() {
 
         {/* Loading State */}
         {loading && (
-          <div className="mt-6 text-center text-slate-500">
+          <div className="mt-6 text-center theme-text-secondary">
             <p>Loading purchase orders...</p>
           </div>
         )}
@@ -227,13 +228,11 @@ function PurchaseOrdersPage() {
         {/* Empty State */}
         {!loading && orders.length === 0 && (
           <div className="mt-10 text-center">
-            <p className="text-slate-500 dark:text-slate-400 mb-4">
-              No purchase orders found
-            </p>
+            <p className="mb-4 theme-text-secondary">No purchase orders found</p>
             {can("purchase-orders.create") && (
               <button
                 onClick={handleCreate}
-                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+                className="inline-flex items-center justify-center rounded-md theme-btn-primary"
                 title="Create first purchase order"
               >
                 <Plus size={16} className="mr-2" />
@@ -245,72 +244,45 @@ function PurchaseOrdersPage() {
 
         {/* Table */}
         {!loading && orders.length > 0 && (
-          <div className="mt-6 overflow-x-auto bg-white dark:bg-slate-800 rounded-lg shadow">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+          <div className="mt-6 overflow-x-auto rounded-lg shadow theme-card">
+            <table className="theme-table text-sm">
+              <thead className="theme-table-header">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-100">
-                    PO Number
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-100">
-                    Supplier
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-100">
-                    Items
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-100">
-                    Total
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-100">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-100">
-                    Created By
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-100">
-                    Date
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-100">
-                    Actions
-                  </th>
+                  <th className="px-4 py-3 text-left font-semibold">PO Number</th>
+                  <th className="px-4 py-3 text-left font-semibold">Supplier</th>
+                  <th className="px-4 py-3 text-left font-semibold">Items</th>
+                  <th className="px-4 py-3 text-left font-semibold">Total</th>
+                  <th className="px-4 py-3 text-left font-semibold">Status</th>
+                  <th className="px-4 py-3 text-left font-semibold">Created By</th>
+                  <th className="px-4 py-3 text-left font-semibold">Date</th>
+                  <th className="px-4 py-3 text-left font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((po) => (
-                  <tr
-                    key={po._id}
-                    className="border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition"
-                  >
-                    <td className="px-4 py-3 font-mono font-semibold text-blue-600 dark:text-blue-400">
-                      <button
-                        onClick={() => handleOpenDetail(po)}
-                        className="hover:underline"
-                      >
+                  <tr key={po._id} className="theme-table-row">
+                    <td className="px-4 py-3 font-mono font-semibold" style={{ color: "var(--color-primary)" }}>
+                      <button onClick={() => handleOpenDetail(po)} className="hover:underline" style={{ color: "inherit" }}>
                         {po.poNumber}
                       </button>
                     </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
-                      {po.supplier?.name || "N/A"}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
-                      {po.items?.length || 0} items
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">
+                    <td className="px-4 py-3 theme-text-secondary">{po.supplier?.name || "N/A"}</td>
+                    <td className="px-4 py-3 theme-text-secondary">{po.items?.length || 0} items</td>
+                    <td className="px-4 py-3 font-semibold theme-text-primary">
                       ${po.totalAmount?.toFixed(2) || "0.00"}
                     </td>
                     <td className="px-4 py-3">
                       <POStatusBadge status={po.status} />
                     </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
-                      {po.createdBy?.name || "Unknown"}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
+                    <td className="px-4 py-3 theme-text-secondary">{po.createdBy?.name || "Unknown"}</td>
+                    <td className="px-4 py-3 theme-text-secondary">
                       {new Date(po.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-4 py-3 flex gap-2">
+                    <td className="px-4 py-3 flex flex-wrap gap-2">
                       <button
                         onClick={() => handleOpenDetail(po)}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
+                        className="theme-icon-btn theme-icon-btn-primary"
+                        style={{ width: "2.5rem", height: "2.5rem" }}
                         title="View PO details"
                       >
                         <Eye size={16} />
@@ -318,7 +290,8 @@ function PurchaseOrdersPage() {
                       {can("purchase-orders.export") && (
                         <button
                           onClick={() => downloadPOPDF(po._id, po.poNumber)}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-rose-500 text-white hover:bg-rose-600 transition"
+                          className="theme-icon-btn theme-btn-danger"
+                          style={{ width: "2.5rem", height: "2.5rem" }}
                           title="Export PO as PDF"
                         >
                           <FileText size={16} />
@@ -327,7 +300,8 @@ function PurchaseOrdersPage() {
                       {can("purchase-orders.update") && po.status === "draft" && (
                         <button
                           onClick={() => handleEdit(po)}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-slate-500 text-white hover:bg-slate-600 transition"
+                          className="theme-icon-btn theme-btn-secondary"
+                          style={{ width: "2.5rem", height: "2.5rem" }}
                           title="Edit PO"
                         >
                           <Edit2 size={16} />
@@ -336,7 +310,8 @@ function PurchaseOrdersPage() {
                       {can("purchase-orders.delete") && po.status === "draft" && (
                         <button
                           onClick={() => handleDelete(po._id)}
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-red-500 text-white hover:bg-red-600 transition"
+                          className="theme-icon-btn theme-btn-danger"
+                          style={{ width: "2.5rem", height: "2.5rem" }}
                           title="Delete PO"
                         >
                           <Trash2 size={16} />
@@ -350,7 +325,7 @@ function PurchaseOrdersPage() {
           </div>
         )}
 
-        {/* Form Modal */}
+        {/* Form Modal - Scrollable */}
         <Modal
           isOpen={showForm}
           title={selectedPO ? "Edit Purchase Order" : "Create Purchase Order"}
@@ -359,16 +334,18 @@ function PurchaseOrdersPage() {
             setSelectedPO(null);
           }}
         >
-          <POForm
-            selectedPO={selectedPO}
-            onSubmit={handleFormSubmit}
-            onClose={() => {
-              setShowForm(false);
-              setSelectedPO(null);
-            }}
-            products={products}
-            suppliers={suppliers}
-          />
+          <div className="max-h-[80vh] overflow-y-auto pr-2">
+            <POForm
+              selectedPO={selectedPO}
+              onSubmit={handleFormSubmit}
+              onClose={() => {
+                setShowForm(false);
+                setSelectedPO(null);
+              }}
+              products={products}
+              suppliers={suppliers}
+            />
+          </div>
         </Modal>
 
         {/* Detail Modal */}

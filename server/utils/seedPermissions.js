@@ -36,6 +36,22 @@ const defaultPermissions = [
   { role: "staff", action: "categories.update", allowed: false },
   { role: "staff", action: "categories.delete", allowed: false },
 
+  // CUSTOMERS
+  { role: "admin", action: "customers.view", allowed: true },
+  { role: "admin", action: "customers.create", allowed: true },
+  { role: "admin", action: "customers.update", allowed: true },
+  { role: "admin", action: "customers.delete", allowed: true },
+
+  { role: "manager", action: "customers.view", allowed: true },
+  { role: "manager", action: "customers.create", allowed: true },
+  { role: "manager", action: "customers.update", allowed: true },
+  { role: "manager", action: "customers.delete", allowed: false },
+
+  { role: "staff", action: "customers.view", allowed: true },
+  { role: "staff", action: "customers.create", allowed: false },
+  { role: "staff", action: "customers.update", allowed: false },
+  { role: "staff", action: "customers.delete", allowed: false },
+
   // SUPPLIERS
   { role: "admin", action: "suppliers.view", allowed: true },
   { role: "admin", action: "suppliers.create", allowed: true },
@@ -51,6 +67,22 @@ const defaultPermissions = [
   { role: "staff", action: "suppliers.create", allowed: false },
   { role: "staff", action: "suppliers.update", allowed: false },
   { role: "staff", action: "suppliers.delete", allowed: false },
+
+  // SALES
+  { role: "admin", action: "sales.view", allowed: true },
+  { role: "admin", action: "sales.create", allowed: true },
+  { role: "admin", action: "sales.update", allowed: true },
+  { role: "admin", action: "sales.delete", allowed: true },
+
+  { role: "manager", action: "sales.view", allowed: true },
+  { role: "manager", action: "sales.create", allowed: true },
+  { role: "manager", action: "sales.update", allowed: true },
+  { role: "manager", action: "sales.delete", allowed: false },
+
+  { role: "staff", action: "sales.view", allowed: true },
+  { role: "staff", action: "sales.create", allowed: true },
+  { role: "staff", action: "sales.update", allowed: false },
+  { role: "staff", action: "sales.delete", allowed: false },
 
   // STOCK
   { role: "admin", action: "stock.view", allowed: true },

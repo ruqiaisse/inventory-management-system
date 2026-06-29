@@ -1,16 +1,36 @@
 const PurchaseOrder = require("../models/PurchaseOrder");
 const Product = require("../models/Product");
+const User = require("../models/User");
 const StockLog = require("../models/StockLogs");
 const ActivityLog = require("../models/ActivityLog");
 const PDFDocument = require("pdfkit");
 const Settings = require("../models/Settings");
+const { sendEmail } = require("../config/email");
+const { poApprovedEmail } = require("../utils/emailTemplates");
+const { sendLowStockAlert } = require("../utils/stockAlerts");
 
-// Auto-generate PO number
+// Auto-generate PO number (FIXED)
 const generatePONumber = async () => {
   try {
-    const count = await PurchaseOrder.countDocuments();
-    const nextNumber = count + 1;
     const year = new Date().getFullYear();
+    
+    // Find the last PO number for this year
+    const lastPO = await PurchaseOrder.findOne({
+      poNumber: new RegExp(`^PO-${year}`)
+    })
+    .sort({ _id: -1 })
+    .lean();
+
+    let nextNumber = 1;
+    
+    if (lastPO) {
+      // Extract number from last PO (e.g., "PO-2026-005" -> 5)
+      const match = lastPO.poNumber.match(/PO-\d+-(\d+)/);
+      if (match) {
+        nextNumber = parseInt(match[1]) + 1;
+      }
+    }
+
     const poNumber = `PO-${year}-${String(nextNumber).padStart(3, "0")}`;
     return poNumber;
   } catch (err) {
@@ -234,14 +254,21 @@ exports.approvePO = async (req, res) => {
       return res.status(404).json({ message: "PO not found" });
     }
 
+    console.log(`Attempting to approve PO ${po.poNumber}, current status: ${po.status}`);
+
     if (po.status !== "submitted") {
-      return res.status(400).json({ message: "Only submitted POs can be approved" });
+      console.log(`❌ Cannot approve PO in "${po.status}" status. Expected "submitted".`);
+      return res.status(400).json({ 
+        message: `Only submitted POs can be approved. Current status: ${po.status}`,
+        currentStatus: po.status 
+      });
     }
 
     po.status = "approved";
     po.approvedBy = userId;
     po.approvedAt = new Date();
     await po.save();
+    console.log(`✅ PO ${po.poNumber} marked as approved in database`);
 
     // Log activity
     await ActivityLog.create({
@@ -252,6 +279,73 @@ exports.approvePO = async (req, res) => {
     });
 
     await po.populate("supplier createdBy approvedBy receivedBy");
+
+    // Send email to PO creator
+    if (po.createdBy) {
+      const creator = await User.findById(po.createdBy).select("email name");
+      if (creator?.email) {
+        const { subject, html } = poApprovedEmail(po);
+        await sendEmail(creator.email, subject, html).catch((err) => {
+          console.error(`Failed to send PO approval email to ${creator.email}:`, err);
+        });
+        await ActivityLog.create({
+          action: "Approval email sent",
+          module: "Purchase Orders",
+          details: `Approval email sent: ${po.poNumber}`,
+          user: userId,
+        });
+      }
+    }
+
+    // Send email to all active users with an email address (exclude approver)
+    try {
+      const approverName = po.approvedBy?.name || po.approvedBy?._id?.toString() || "Staff";
+      console.log("Looking for users to notify about PO approval...");
+
+      const recipients = await User.find({
+        _id: { $ne: userId }, // Exclude the approver
+        email: { $exists: true, $ne: null }, // Must have email
+        isActive: true,
+      }).select("email name role");
+
+      console.log(`Found ${recipients.length} users with emails (excluding approver)`);
+
+      if (recipients.length === 0) {
+        console.log("No eligible recipients found for PO approval notifications.");
+      }
+
+      for (const r of recipients) {
+        try {
+          if (r?.email) {
+            const { subject, html } = poApprovedEmail(po);
+            const recipientSubject = `PO Approved: ${po.poNumber}`;
+            const recipientHtml = html.replace(
+              "Your Purchase Order has been approved",
+              `Purchase Order ${po.poNumber} has been approved by ${approverName}`
+            );
+
+            console.log(`Sending PO approval email to: ${r.email} (${r.role})`);
+            await sendEmail(r.email, recipientSubject, recipientHtml);
+            console.log(`✅ Email sent to ${r.email}`);
+          }
+        } catch (err) {
+          console.error(`❌ Failed to send PO approval email to ${r.email}:`, err?.message || err);
+        }
+      }
+
+      if (recipients.length > 0) {
+        await ActivityLog.create({
+          action: "Staff notifications sent",
+          module: "Purchase Orders",
+          details: `PO approval notifications sent to ${recipients.length} recipient(s): ${po.poNumber}`,
+          user: userId,
+        });
+        console.log(`Activity logged for ${recipients.length} notification(s)`);
+      }
+    } catch (err) {
+      console.error("❌ Error sending PO approval notifications:", err?.message || err);
+      // Don't fail the approval if notifications fail
+    }
 
     res.json({
       message: "PO approved successfully",
@@ -291,6 +385,8 @@ exports.receivePO = async (req, res) => {
       // Update product stock
       product.stock = stockAfter;
       await product.save();
+
+      await sendLowStockAlert(product, stockBefore, product.minStock);
 
       // Create stock log
       await StockLog.create({

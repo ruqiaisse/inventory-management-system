@@ -46,17 +46,63 @@ function PODetailModal({ isOpen, onClose, po, onAction }) {
   const canExport = can("purchase-orders.export");
   const canUpload = can("purchase-orders.upload");
 
+  const sectionStyle = {
+    backgroundColor: "var(--panel-bg)",
+    border: "1px solid var(--border-color)",
+    color: "var(--text-primary)",
+  };
+
+  const headingStyle = {
+    color: "var(--text-primary)",
+  };
+
+  const subtitleStyle = {
+    color: "var(--text-secondary)",
+  };
+
+  const attachmentStyle = {
+    backgroundColor: "var(--panel-bg)",
+    color: "var(--color-info)",
+    border: "1px solid var(--border-color)",
+  };
+
+  const buttonPrimaryStyle = {
+    backgroundColor: "var(--button-primary-bg)",
+    color: "#ffffff",
+  };
+
+  const buttonSuccessStyle = {
+    backgroundColor: "var(--color-success)",
+    color: "#ffffff",
+    border: "1px solid var(--color-success-dark)",
+  };
+
+  const buttonDangerStyle = {
+    backgroundColor: "var(--color-danger)",
+    color: "#ffffff",
+    border: "1px solid var(--color-danger-dark)",
+  };
+
+  const buttonNeutralStyle = {
+    backgroundColor: "var(--button-secondary-bg)",
+    color: "var(--text-primary)",
+    border: "1px solid var(--border-color)",
+  };
+
   return (
     <Modal isOpen={isOpen} title="Purchase Order Details" onClose={onClose}>
       <div className="space-y-6 max-h-[80vh] overflow-y-auto">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-lg">
+        <div className="p-4 rounded-lg" style={{
+          background: "linear-gradient(90deg, var(--panel-bg) 0%, var(--bg-secondary) 100%)",
+          border: "1px solid var(--border-color)",
+          color: "var(--text-primary)",
+        }}>
           <div className="flex justify-between items-start mb-3">
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+              <h2 className="text-2xl font-bold" style={{ color: "var(--color-primary)" }}>
                 {po.poNumber}
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-sm" style={subtitleStyle}>
                 Created: {new Date(po.createdAt).toLocaleDateString()}
               </p>
             </div>
@@ -64,47 +110,43 @@ function PODetailModal({ isOpen, onClose, po, onAction }) {
           </div>
 
           {po.createdBy && (
-            <p className="text-sm text-slate-700 dark:text-slate-300">
+            <p className="text-sm" style={subtitleStyle}>
               Created by: <strong>{po.createdBy.name}</strong>
             </p>
           )}
 
           {po.approvedBy && po.approvedAt && (
-            <p className="text-sm text-slate-700 dark:text-slate-300">
-              Approved by: <strong>{po.approvedBy.name}</strong> on{" "}
-              {new Date(po.approvedAt).toLocaleDateString()}
+            <p className="text-sm" style={subtitleStyle}>
+              Approved by: <strong>{po.approvedBy.name}</strong> on {new Date(po.approvedAt).toLocaleDateString()}
             </p>
           )}
 
           {po.receivedBy && po.receivedAt && (
-            <p className="text-sm text-slate-700 dark:text-slate-300">
-              Received by: <strong>{po.receivedBy.name}</strong> on{" "}
-              {new Date(po.receivedAt).toLocaleDateString()}
+            <p className="text-sm" style={subtitleStyle}>
+              Received by: <strong>{po.receivedBy.name}</strong> on {new Date(po.receivedAt).toLocaleDateString()}
             </p>
           )}
         </div>
 
-        {/* Supplier Info */}
         <div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">
+          <h3 className="text-lg font-semibold mb-3" style={headingStyle}>
             Supplier Information
           </h3>
-          <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg space-y-2">
-            <p className="text-slate-900 dark:text-slate-100">
+          <div className="p-4 rounded-lg space-y-2" style={sectionStyle}>
+            <p style={headingStyle}>
               <strong>{po.supplier?.name}</strong>
             </p>
-            <p className="text-slate-700 dark:text-slate-300 text-sm">
+            <p className="text-sm" style={subtitleStyle}>
               Email: {po.supplier?.email || "N/A"}
             </p>
-            <p className="text-slate-700 dark:text-slate-300 text-sm">
+            <p className="text-sm" style={subtitleStyle}>
               Phone: {po.supplier?.phone || "N/A"}
             </p>
           </div>
         </div>
 
-        {/* Items Table */}
         <div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">
+          <h3 className="text-lg font-semibold mb-3" style={headingStyle}>
             Items ({po.items?.length || 0})
           </h3>
           <div className="space-y-3">
@@ -121,34 +163,34 @@ function PODetailModal({ isOpen, onClose, po, onAction }) {
             ))}
           </div>
 
-          {/* Grand Total */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mt-4 border-2 border-blue-200 dark:border-blue-800">
+          <div className="p-4 rounded-lg mt-4" style={sectionStyle}>
             <div className="flex justify-between items-center">
-              <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              <span className="text-lg font-semibold" style={headingStyle}>
                 Total:
               </span>
-              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              <span className="text-2xl font-bold" style={{ color: "var(--color-primary)" }}>
                 ${po.totalAmount?.toFixed(2) || "0.00"}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Notes */}
         {po.notes && (
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            <h3 className="text-lg font-semibold mb-2" style={headingStyle}>
               Notes
             </h3>
-            <p className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg text-slate-700 dark:text-slate-300">
+            <p className="p-4 rounded-lg" style={{
+              ...sectionStyle,
+              color: "var(--text-secondary)",
+            }}>
               {po.notes}
             </p>
           </div>
         )}
 
-        {/* Attachments */}
         <div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">
+          <h3 className="text-lg font-semibold mb-3" style={headingStyle}>
             Attachments
           </h3>
           <div className="space-y-3">
@@ -160,20 +202,26 @@ function PODetailModal({ isOpen, onClose, po, onAction }) {
                     href={attachment}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block px-3 py-2 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 hover:underline rounded text-sm truncate"
+                    className="block px-3 py-2 rounded text-sm truncate"
+                    style={attachmentStyle}
                   >
                     📄 {attachment.split("/").pop()}
                   </a>
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 dark:text-slate-400 text-sm">No files attached</p>
+              <p className="text-sm" style={subtitleStyle}>
+                No files attached
+              </p>
             )}
 
             {canUpload && (
               <div>
                 <label className="block">
-                  <span className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded text-sm font-medium cursor-pointer transition inline-block">
+                  <span
+                    className="px-4 py-2 rounded text-sm font-medium cursor-pointer transition inline-block"
+                    style={buttonPrimaryStyle}
+                  >
                     {uploading ? "Uploading..." : "Upload File"}
                   </span>
                   <input
@@ -189,12 +237,12 @@ function PODetailModal({ isOpen, onClose, po, onAction }) {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-3 flex-wrap pt-4 border-t border-slate-200 dark:border-slate-700">
+        <div className="flex gap-3 flex-wrap pt-4" style={{ borderTop: "1px solid var(--border-color)" }}>
           {canSubmit && (
             <button
               onClick={() => handleStatusAction("submit")}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition"
+              style={buttonPrimaryStyle}
             >
               Submit PO
             </button>
@@ -203,7 +251,8 @@ function PODetailModal({ isOpen, onClose, po, onAction }) {
           {canApprove && (
             <button
               onClick={() => handleStatusAction("approve")}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition"
+              style={buttonSuccessStyle}
             >
               Approve PO
             </button>
@@ -212,7 +261,8 @@ function PODetailModal({ isOpen, onClose, po, onAction }) {
           {canReceive && (
             <button
               onClick={() => handleStatusAction("receive")}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition"
+              style={buttonSuccessStyle}
             >
               Mark as Received
             </button>
@@ -221,7 +271,8 @@ function PODetailModal({ isOpen, onClose, po, onAction }) {
           {canCancel && (
             <button
               onClick={() => handleStatusAction("cancel")}
-              className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-medium transition"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition"
+              style={buttonDangerStyle}
             >
               Cancel PO
             </button>
@@ -230,7 +281,8 @@ function PODetailModal({ isOpen, onClose, po, onAction }) {
           {canEdit && (
             <button
               onClick={() => onAction("edit")}
-              className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-sm font-medium transition"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition"
+              style={buttonNeutralStyle}
             >
               Edit PO
             </button>
@@ -239,14 +291,14 @@ function PODetailModal({ isOpen, onClose, po, onAction }) {
           {canExport && (
             <button
               onClick={() => onAction("export")}
-              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-sm font-medium transition"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition"
+              style={buttonDangerStyle}
             >
               📥 Download PDF
             </button>
           )}
         </div>
 
-        {/* Toast */}
         {toast.visible && (
           <Toast
             message={toast.message}

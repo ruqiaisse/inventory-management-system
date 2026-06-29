@@ -84,10 +84,16 @@ function ProductImageUpload({ currentImage, onImageUploaded, onImageRemoved }) {
 
   return (
     <div>
-      <label className="block text-sm font-medium mb-2">Product Image</label>
+      <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-primary)" }}>
+        Product Image
+      </label>
       <div
-        className="relative rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center hover:border-slate-400 hover:bg-slate-100 cursor-pointer"
+        className="relative rounded-3xl p-4 text-center cursor-pointer transition"
         onClick={() => fileInputRef.current?.click()}
+        style={{
+          border: "1px dashed var(--border-color)",
+          backgroundColor: "var(--panel-bg)",
+        }}
       >
         <input
           ref={fileInputRef}
@@ -98,7 +104,9 @@ function ProductImageUpload({ currentImage, onImageUploaded, onImageRemoved }) {
         />
 
         {uploading ? (
-          <div className="py-12 text-slate-600">Uploading...</div>
+          <div className="py-12" style={{ color: "var(--text-secondary)" }}>
+            Uploading...
+          </div>
         ) : preview ? (
           <div className="relative inline-block">
             <img
@@ -112,20 +120,32 @@ function ProductImageUpload({ currentImage, onImageUploaded, onImageRemoved }) {
                 event.stopPropagation();
                 handleRemove();
               }}
-              className="absolute right-2 top-2 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-600 shadow-md"
+              className="absolute right-2 top-2 inline-flex h-9 w-9 items-center justify-center rounded-full shadow-md"
+              style={{
+                backgroundColor: "var(--bg-secondary)",
+                color: "var(--text-primary)",
+              }}
             >
               ×
             </button>
           </div>
         ) : (
           <div className="py-12">
-            <p className="text-sm font-semibold text-slate-900">Click to upload or drag image here</p>
-            <p className="mt-2 text-xs text-slate-500">PNG, JPG, WEBP · max 5MB</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+              Click to upload or drag image here
+            </p>
+            <p className="mt-2 text-xs" style={{ color: "var(--text-secondary)" }}>
+              PNG, JPG, WEBP · max 5MB
+            </p>
           </div>
         )}
       </div>
 
-      {error && <p className="mt-2 text-sm text-rose-600">{error}</p>}
+      {error && (
+        <p className="mt-2 text-sm" style={{ color: "var(--color-danger)" }}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }

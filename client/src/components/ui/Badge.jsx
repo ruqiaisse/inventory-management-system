@@ -1,16 +1,22 @@
-// Badge is a simple presentational component — no React default import needed
 
 const typeMap = {
-  success: "bg-emerald-100 text-emerald-700",
-  warning: "bg-amber-100 text-amber-700",
-  danger: "bg-rose-100 text-rose-700",
-  info: "bg-sky-100 text-sky-700",
-  gray: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+  success: { bg: "var(--color-success-light)", text: "var(--color-success)" },
+  warning: { bg: "var(--color-warning-light)", text: "var(--color-warning)" },
+  danger: { bg: "var(--color-danger-light)", text: "var(--color-danger)" },
+  info: { bg: "var(--color-info-light)", text: "var(--color-info)" },
+  gray: { bg: "var(--bg-tertiary)", text: "var(--text-secondary)" },
 };
 
 function Badge({ type = "gray", children }) {
+  const style = typeMap[type] || typeMap.gray;
   return (
-    <span className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold ${typeMap[type] || typeMap.gray}`}>
+    <span
+      className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+      style={{
+        backgroundColor: style.bg,
+        color: style.text,
+      }}
+    >
       {children}
     </span>
   );

@@ -4,6 +4,8 @@ const qrcode = require("qrcode");
 const Product = require("../models/Product");
 const { logActivity } = require("../utils/activityLogger");
 const { translateError } = require("../utils/errorTranslator");
+const { sendLowStockAlert } = require("../utils/stockAlerts");
+
 
 
 const getProducts = async (req, res) => {
@@ -194,6 +196,11 @@ const updateProduct = async (req, res) => {
       .populate("category", "name description")
       .populate("supplier", "name email phone")
       .populate("createdBy", "name email");
+
+    // Send low stock alert if stock status crosses into low.
+    const oldStock = product.stock;
+    const oldMinStock = product.minStock;
+    await sendLowStockAlert(updatedProduct, oldStock, oldMinStock);
 
     // Log activity
     await logActivity(`Updated product: ${updatedProduct.name}`, "products", req.user ? req.user._id : null);

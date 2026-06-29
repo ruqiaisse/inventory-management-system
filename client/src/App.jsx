@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import MainLayout from "./components/layout/MainLayout";
@@ -9,6 +8,8 @@ import DashboardPage from "./pages/DashboardPage";
 import ProductsPage from "./pages/ProductsPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import SuppliersPage from "./pages/SuppliersPage";
+import CustomersPage from "./pages/CustomersPage";
+import SalesPage from "./pages/SalesPage";
 import ReportsPage from "./pages/ReportsPage";
 import ActivityPage from "./pages/ActivityPage";
 import UsersPage from "./pages/UsersPage";
@@ -16,24 +17,21 @@ import SettingsPage from "./pages/SettingsPage";
 import PermissionsPage from "./pages/PermissionsPage";
 import PurchaseOrdersPage from "./pages/PurchaseOrdersPage";
 import LoginPage from "./pages/LoginPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
-  // Initialize dark mode from localStorage
-  useEffect(() => {
-    const theme = localStorage.getItem("theme");
-    const html = document.documentElement;
-    if (theme === "dark") {
-      html.classList.add("dark");
-    } else {
-      html.classList.remove("dark");
-    }
-  }, []);
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<Navigate to="/login" replace />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
         <Route
           path="/dashboard"
@@ -85,6 +83,28 @@ function App() {
             <ProtectedRoute>
               <PermissionRoute permission="purchase-orders.view">
                 <PurchaseOrdersPage />
+              </PermissionRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/customers"
+          element={
+            <ProtectedRoute>
+              <PermissionRoute permission="customers.view">
+                <CustomersPage />
+              </PermissionRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/sales"
+          element={
+            <ProtectedRoute>
+              <PermissionRoute permission="sales.view">
+                <SalesPage />
               </PermissionRoute>
             </ProtectedRoute>
           }
@@ -151,9 +171,9 @@ function App() {
               </AdminRoute>
             </ProtectedRoute>
           }
-        />
+        />      
 
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
