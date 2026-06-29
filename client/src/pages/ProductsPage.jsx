@@ -639,9 +639,7 @@ const ProductsPage = () => {
           }
           onClose={() => setIsModalOpen(false)}
         >
-          <form onSubmit={handleSubmit} className="flex flex-col max-h-[80vh]">
-            {/* Scrollable form content */}
-            <div className="overflow-y-auto space-y-4 pr-2 flex-1">
+          <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1 theme-text-primary">
@@ -851,10 +849,9 @@ const ProductsPage = () => {
                   setFormData((prev) => ({ ...prev, image: "" }))
                 }
               />
-            </div>
 
             {/* Fixed action buttons at bottom */}
-            <div className="flex gap-3 justify-end mt-6 border-t pt-4 flex-shrink-0">
+            <div className="flex gap-3 justify-end mt-6 border-t pt-4">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
