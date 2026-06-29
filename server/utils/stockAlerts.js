@@ -4,9 +4,10 @@ const { lowStockEmail } = require("./emailTemplates");
 const { logActivity } = require("./activityLogger");
 
 const sendLowStockAlert = async (product, oldStock, oldMinStock) => {
-  const previouslyLow = oldStock <= oldMinStock;
   const currentlyLow = product.stock <= product.minStock;
-  const shouldNotify = currentlyLow && !previouslyLow;
+  const stockDropped = typeof oldStock === "number" && product.stock < oldStock;
+  const minStockRaised = typeof oldMinStock === "number" && product.minStock > oldMinStock;
+  const shouldNotify = currentlyLow && (stockDropped || minStockRaised);
 
   if (!shouldNotify) return;
 

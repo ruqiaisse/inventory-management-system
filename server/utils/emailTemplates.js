@@ -347,8 +347,113 @@ const poApprovedEmail = (po) => {
   return { subject, html };
 };
 
+const poReceivedEmail = (po, receiverName) => {
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+  const subject = `Purchase Order Received: ${po.poNumber}`;
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+        }
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #f9f9f9;
+        }
+        .header {
+          background-color: #27ae60;
+          color: white;
+          padding: 20px;
+          text-align: center;
+          border-radius: 5px 5px 0 0;
+        }
+        .content {
+          background-color: white;
+          padding: 30px;
+          border: 1px solid #ddd;
+        }
+        .info-box {
+          background-color: #f5f5f5;
+          padding: 15px;
+          border-radius: 5px;
+          margin: 20px 0;
+        }
+        .info-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px solid #ddd;
+        }
+        .button {
+          display: inline-block;
+          background-color: #3498db;
+          color: white;
+          padding: 10px 20px;
+          text-decoration: none;
+          border-radius: 5px;
+          margin: 20px 0;
+        }
+        .footer {
+          background-color: #ecf0f1;
+          padding: 15px;
+          text-align: center;
+          font-size: 12px;
+          color: #666;
+          border-radius: 0 0 5px 5px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>📦 Purchase Order Received</h1>
+          <p>InvenPro Purchase Order System</p>
+        </div>
+        <div class="content">
+          <p>Hello,</p>
+          <div class="info-box">
+            <div class="info-row">
+              <strong>PO Number:</strong>
+              <span>${po.poNumber}</span>
+            </div>
+            <div class="info-row">
+              <strong>Supplier:</strong>
+              <span>${po.supplier?.name || "N/A"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Received By:</strong>
+              <span>${receiverName || "Staff"}</span>
+            </div>
+            <div class="info-row">
+              <strong>Status:</strong>
+              <span style="color: #27ae60; font-weight: bold;">Received</span>
+            </div>
+          </div>
+          <p>The purchase order has been marked as received. Please review it in the dashboard for the latest inventory updates.</p>
+          <a href="${clientUrl}/purchase-orders" class="button">View Purchase Orders</a>
+          <p>Best regards,<br><strong>InvenPro Team</strong></p>
+        </div>
+        <div class="footer">
+          <p>&copy; 2025 InvenPro. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return { subject, html };
+};
+
 module.exports = {
   passwordResetEmail,
   lowStockEmail,
   poApprovedEmail,
+  poReceivedEmail,
 };

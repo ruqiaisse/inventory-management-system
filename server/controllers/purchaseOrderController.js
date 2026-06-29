@@ -6,7 +6,7 @@ const ActivityLog = require("../models/ActivityLog");
 const PDFDocument = require("pdfkit");
 const Settings = require("../models/Settings");
 const { sendEmail } = require("../config/email");
-const { poApprovedEmail } = require("../utils/emailTemplates");
+const { poApprovedEmail, poReceivedEmail } = require("../utils/emailTemplates");
 const { sendLowStockAlert } = require("../utils/stockAlerts");
 
 // Auto-generate PO number (FIXED)
@@ -303,8 +303,9 @@ exports.approvePO = async (req, res) => {
       console.log("Looking for users to notify about PO approval...");
 
       const recipients = await User.find({
-        _id: { $ne: userId }, // Exclude the approver
-        email: { $exists: true, $ne: null }, // Must have email
+        role: "staff",
+        _id: { $ne: userId },
+        email: { $exists: true, $ne: "" },
         isActive: true,
       }).select("email name role");
 
@@ -415,6 +416,34 @@ exports.receivePO = async (req, res) => {
     });
 
     await po.populate("supplier createdBy approvedBy receivedBy");
+
+    if (req.user?.role === "staff") {
+      const recipients = await User.find({
+        role: { $in: ["admin", "manager"] },
+        isActive: true,
+        email: { $exists: true, $ne: "" },
+      }).select("email name");
+
+      if (recipients.length > 0) {
+        const receiverName = req.user.name || "Staff";
+        const { subject, html } = poReceivedEmail(po, receiverName);
+
+        await Promise.all(
+          recipients.map((recipient) =>
+            sendEmail(recipient.email, subject, html).catch((err) => {
+              console.error(`Failed to send PO received email to ${recipient.email}:`, err?.message || err);
+            })
+          )
+        );
+
+        await ActivityLog.create({
+          action: "Received PO notification sent",
+          module: "Purchase Orders",
+          details: `PO received notifications sent to ${recipients.length} recipient(s): ${po.poNumber}`,
+          user: userId,
+        });
+      }
+    }
 
     res.json({
       message: "PO received successfully",
